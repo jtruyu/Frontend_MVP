@@ -83,16 +83,12 @@ function App() {
     setPantalla("simulacro");
     
     try {
-      const response = await axios.get("https://mi-proyecto-fastapi.onrender.com/simulacro", {
-        params: { 
-          num_preguntas: 10 // Solicitamos 10 preguntas
-        }
-      });
+      const response = await axios.get("https://mi-proyecto-fastapi.onrender.com/simulacro");
 
       if (response.data && response.data.length > 0) {
         setPreguntas(response.data);
       } else {
-        alert("No se pudieron cargar suficientes preguntas. Intenta nuevamente.");
+        alert("No se pudieron cargar los ejercicios. Intenta nuevamente.");
         setPantalla("inicio");
       }
     } catch (error) {
@@ -228,7 +224,8 @@ function App() {
       <div className="container inicio-container">
         <h1>EDBOT: Simulador de Examen</h1>
         <div className="inicio-content">
-          <p>Este simulacro contiene 10 ejercicios seleccionados de Física que te permitirán evaluar tu nivel de preparación.</p>
+          <p>Este simulacro contiene 11 ejercicios de admisión que te permitirán evaluar tu nivel de preparación.</p>
+          <p>Los ejercicios incluyen cursos como RM, Aritmética, Álgebra, Geometría, Trigonometría, Física y Química.</p>
           <p>Dispondrás de 40 minutos para resolverlos.</p>
           <p>¡Mucho éxito!</p>
           <button className="boton-iniciar" onClick={iniciarSimulacro}>
@@ -301,7 +298,9 @@ function App() {
       <div className="container simulacro-container">
         <div className="encabezado-simulacro">
           <div className="progreso">
-            <div className="texto-progreso">Pregunta: {preguntaActual + 1} de {preguntas.length}</div>
+            <div className="texto-progreso">
+              Pregunta: {preguntaActual + 1} de {preguntas.length} | Curso: {pregunta.curso}
+            </div>
             <div className="barra-progreso">
               <div 
                 className="progreso-completado" 
@@ -418,7 +417,9 @@ function App() {
             >
               <div className="numero-pregunta">{index + 1}</div>
               <div className="contenido-detalle">
-                <div className="texto-ejercicio" dangerouslySetInnerHTML={{ __html: pregunta.ejercicio }}></div>
+                <div className="texto-ejercicio">
+                  <strong>{pregunta.curso}</strong>: <span dangerouslySetInnerHTML={{ __html: pregunta.ejercicio }}></span>
+                </div>
                 <div className="respuesta-detalle">
                   {!respuestas[pregunta.ejercicio] ? (
                     <span className="estado-respuesta sin-responder">Sin responder</span>
