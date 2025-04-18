@@ -71,8 +71,23 @@ function App() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return datosUsuario.nombre.trim() !== "" && emailRegex.test(datosUsuario.correo);
   };
-
+   // Añade esta función después de validarFormulario() para definir el orden de los cursos
+  const obtenerOrdenCurso = (curso) => {
+    const ordenCursos = {
+      "RM": 1,
+      "Aritmética": 2,
+      "Álgebra": 3,
+      "Geometría": 4,
+      "Trigonometría": 5,
+      "Física": 6,
+      "Química": 7
+    };
+    
+    return ordenCursos[curso] || 999; // Si no encuentra el curso, lo coloca al final
+  };
+    
   // Función para iniciar el simulacro directamente desde la pantalla de inicio
+  // Modifica la función iniciarSimulacro() para ordenar las preguntas después de recibirlas
   const iniciarSimulacro = async () => {
     setCargando(true);
     setRespuestas({});
@@ -83,14 +98,19 @@ function App() {
     setPantalla("simulacro");
     
     try {
-      const response = await axios.get("https://backend-mvp-a6w0.onrender.com/simulacro", {
+      const response = await axios.get("https://mi-proyecto-fastapi.onrender.com/simulacro", {
         params: { 
           num_preguntas: 10 // Solicitamos 10 preguntas
         }
       });
-
+  
       if (response.data && response.data.length > 0) {
-        setPreguntas(response.data);
+        // Ordenar las preguntas según el curso antes de establecerlas en el estado
+        const preguntasOrdenadas = [...response.data].sort((a, b) => {
+          return obtenerOrdenCurso(a.curso) - obtenerOrdenCurso(b.curso);
+        });
+        
+        setPreguntas(preguntasOrdenadas);
       } else {
         alert("No se pudieron cargar suficientes preguntas. Intenta nuevamente.");
         setPantalla("inicio");
