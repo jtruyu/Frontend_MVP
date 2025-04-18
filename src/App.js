@@ -83,7 +83,7 @@ function App() {
     setPantalla("simulacro");
     
     try {
-      const response = await axios.get("https://backend-mvp-a6w0.onrender.com/simulacro", {
+      const response = await axios.get("https://mi-proyecto-fastapi.onrender.com/simulacro", {
         params: { 
           num_preguntas: 10 // Solicitamos 10 preguntas
         }
@@ -123,69 +123,38 @@ function App() {
     }
   };
 
-  // Función para calcular la nota vigesimal según curso de pregunta
-  const calcularNotaVigesimal = () => {
-    // Mapa con valores por tipo de curso
-    const puntajesPorCurso = {
-      "RM": 1.8,         // Razonamiento Matemático - 2 preguntas
-      "aritmetica": 2.2, // 1 pregunta
-      "algebra": 2.2,    // 1 pregunta
-      "geometria": 2.2,  // 1 pregunta
-      "trigonometria": 2.2, // 1 pregunta
-      "fisica": 2.4,     // 2 preguntas
-      "quimica": 1.4     // 2 preguntas
-    };
-    
-    // Contamos preguntas correctas por curso
-    let notaTotal = 0;
-    
-    // Usamos el campo curso en lugar de tipo
-    preguntas.forEach((pregunta) => {
-      const respuestaUsuario = respuestas[pregunta.ejercicio];
-      if (respuestaUsuario === pregunta.alt_correcta) {
-        // Si la respuesta es correcta, sumamos el puntaje correspondiente al curso
-        const cursoLower = pregunta.curso ? pregunta.curso.toLowerCase() : "";
-        
-        // Buscamos coincidencias parciales para mapear los cursos
-        let puntajeAsignar = 0;
-        
-        if (cursoLower.includes("razon") || cursoLower.includes("rm")) {
-          puntajeAsignar = puntajesPorCurso["RM"];
-        } else if (cursoLower.includes("aritm")) {
-          puntajeAsignar = puntajesPorCurso["aritmetica"];
-        } else if (cursoLower.includes("álgeb")) {
-          puntajeAsignar = puntajesPorCurso["algebra"];
-        } else if (cursoLower.includes("geom")) {
-          puntajeAsignar = puntajesPorCurso["geometria"];
-        } else if (cursoLower.includes("trigo")) {
-          puntajeAsignar = puntajesPorCurso["trigonometria"];
-        } else if (cursoLower.includes("físi")) {
-          puntajeAsignar = puntajesPorCurso["fisica"];
-        } else if (cursoLower.includes("quím")) {
-          puntajeAsignar = puntajesPorCurso["quimica"];
-        }
-        
-        notaTotal += puntajeAsignar;
-      }
-    });
-    
-    // Redondeamos a un decimal
-    return Math.round(notaTotal * 10) / 10;
+  // Función para calcular puntaje según el curso
+  const calcularPuntajePorCurso = (curso) => {
+    switch (curso) {
+      case "RM":
+        return 1.8;
+      case "Aritmética":
+      case "Álgebra":
+      case "Geometría":
+      case "Trigonometría":
+        return 2.2;
+      case "Física":
+        return 2.4;
+      case "Química":
+        return 1.4;
+      default:
+        return 2.0; // Valor por defecto en caso de curso no especificado
+    }
   };
 
   // Función para obtener comentario según nota vigesimal
-  const obtenerComentario = (nota) => {
-    if (nota < 8) {
+  const obtenerComentario = (notaVigesimal) => {
+    if (notaVigesimal < 8) {
       return "Aún te falta adquirir el nivel necesario para rendir un examen de admisión a la UNI. Continúa practicando y refuerza los conceptos básicos.";
-    } else if (nota < 10) {
+    } else if (notaVigesimal < 10) {
       return "Tienes opciones, pero muy bajas, de ingresar a la UNI. Enfócate en mejorar tus áreas más débiles y practica con más intensidad.";
-    } else if (nota < 12) {
+    } else if (notaVigesimal < 12) {
       return "Tienes opciones de ingreso, pero sin asegurar. Continúa trabajando en las áreas donde tuviste dificultades para aumentar tus probabilidades.";
-    } else if (nota < 14) {
+    } else if (notaVigesimal < 14) {
       return "¡Tienes buenas opciones de ingreso! Estás en el camino correcto, sigue practicando para consolidar tus conocimientos.";
-    } else if (nota < 16) {
+    } else if (notaVigesimal < 16) {
       return "¡Tu ingreso es prácticamente seguro! Mantén el ritmo de estudio y prepárate para destacar en la universidad.";
-    } else if (nota < 18) {
+    } else if (notaVigesimal < 18) {
       return "¡Excelente! Estás luchando para ser de los primeros puestos de tu carrera. Continúa con esta dedicación.";
     } else {
       return "¡Impresionante! Con este nivel estás preparado para estar en el cómputo general y entre los mejores ingresantes. ¡Felicitaciones!";
@@ -200,6 +169,7 @@ function App() {
     let preguntasCorrectas = 0;
     let preguntasIncorrectas = 0;
     let preguntasSinResponder = 0;
+    let notaTotal = 0;
     
     preguntas.forEach((pregunta) => {
       const respuestaUsuario = respuestas[pregunta.ejercicio];
@@ -207,17 +177,23 @@ function App() {
       if (!respuestaUsuario) {
         nuevosResultados[pregunta.ejercicio] = "Sin responder";
         preguntasSinResponder++;
-      } else if (respuestaUsuario === pregunta.alt_correcta) {
+      } else if (respuestaUsuario === pregunta.respuesta_correcta) {
         nuevosResultados[pregunta.ejercicio] = "Correcta";
         preguntasCorrectas++;
+        // Sumar puntaje según el curso
+        notaTotal += calcularPuntajePorCurso(pregunta.curso);
       } else {
-        nuevosResultados[pregunta.ejercicio] = `Incorrecta (Respuesta: ${pregunta.alt_correcta})`;
+        nuevosResultados[pregunta.ejercicio] = `Incorrecta (Respuesta: ${pregunta.respuesta_correcta})`;
         preguntasIncorrectas++;
       }
     });
     
-    // Calculamos nota vigesimal usando nuestra función
-    const notaVigesimal = calcularNotaVigesimal();
+    // Calcular porcentaje para mantener compatibilidad con código anterior
+    const porcentaje = (preguntasCorrectas / preguntas.length) * 100;
+    
+    // Asegurar que la nota no exceda 20 (por si acaso)
+    notaTotal = Math.min(notaTotal, 20);
+    
     const tiempoUsado = tiempoInicial - tiempo; // Tiempo usado en segundos
     
     // Guardar resultados temporalmente
@@ -226,12 +202,13 @@ function App() {
       correctas: preguntasCorrectas,
       incorrectas: preguntasIncorrectas,
       sinResponder: preguntasSinResponder,
-      notaVigesimal: notaVigesimal,
+      porcentaje: porcentaje,
+      notaVigesimal: notaTotal,
       tiempoUsado: tiempoUsado
     });
     
     // Establecer el comentario según la nota vigesimal
-    setComentarioResultado(obtenerComentario(notaVigesimal));
+    setComentarioResultado(obtenerComentario(notaTotal));
     
     // Mostrar pantalla de formulario para recoger datos del usuario
     setPantalla("formulario");
@@ -249,10 +226,10 @@ function App() {
     
     // Guardar los resultados en la base de datos
     try {
-      await axios.post("https://backend-mvp-a6w0.onrender.com/guardar-resultado", {
+      await axios.post("https://mi-proyecto-fastapi.onrender.com/guardar-resultado", {
         nombre: datosUsuario.nombre,
         correo: datosUsuario.correo,
-        nota: resultadosTemporales.notaVigesimal,
+        resultado: resultadosTemporales.notaVigesimal, // Ahora guardamos la nota vigesimal
         preguntas_correctas: resultadosTemporales.correctas,
         preguntas_incorrectas: resultadosTemporales.incorrectas,
         preguntas_sin_responder: resultadosTemporales.sinResponder,
@@ -462,7 +439,7 @@ function App() {
               className={`detalle-pregunta ${
                 !respuestas[pregunta.ejercicio] 
                   ? "sin-responder" 
-                  : respuestas[pregunta.ejercicio] === pregunta.alt_correcta 
+                  : respuestas[pregunta.ejercicio] === pregunta.respuesta_correcta 
                     ? "correcta" 
                     : "incorrecta"
               }`}
@@ -473,14 +450,14 @@ function App() {
                 <div className="respuesta-detalle">
                   {!respuestas[pregunta.ejercicio] ? (
                     <span className="estado-respuesta sin-responder">Sin responder</span>
-                  ) : respuestas[pregunta.ejercicio] === pregunta.alt_correcta ? (
+                  ) : respuestas[pregunta.ejercicio] === pregunta.respuesta_correcta ? (
                     <span className="estado-respuesta correcta">
-                      Correcta: {pregunta.alt_correcta}
+                      Correcta: {pregunta.respuesta_correcta} ({calcularPuntajePorCurso(pregunta.curso)} pts)
                     </span>
                   ) : (
                     <span className="estado-respuesta incorrecta">
                       Incorrecta: Elegiste {respuestas[pregunta.ejercicio]}, 
-                      Correcta: {pregunta.alt_correcta}
+                      Correcta: {pregunta.respuesta_correcta}
                     </span>
                   )}
                 </div>
