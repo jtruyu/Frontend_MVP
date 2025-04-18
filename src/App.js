@@ -83,7 +83,7 @@ function App() {
     setPantalla("simulacro");
     
     try {
-      const response = await axios.get("https://mi-proyecto-fastapi.onrender.com/simulacro");
+      const response = await axios.get("https://Backend-MVP.onrender.com/simulacro");
 
       if (response.data && response.data.length > 0) {
         setPreguntas(response.data);
@@ -194,7 +194,7 @@ function App() {
     
     // Guardar los resultados en la base de datos
     try {
-      await axios.post("https://mi-proyecto-fastapi.onrender.com/guardar-resultado", {
+      await axios.post("https://Backend-MVP.onrender.com/guardar-resultado", {
         nombre: datosUsuario.nombre,
         correo: datosUsuario.correo,
         resultado: resultadosTemporales.porcentaje,
