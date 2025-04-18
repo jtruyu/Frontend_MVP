@@ -123,10 +123,10 @@ function App() {
     }
   };
 
-  // Función para calcular la nota vigesimal según tipo de pregunta
-  const calcularNotaVigesimal = (preguntasCorrectas) => {
-    // Mapa con valores por tipo de pregunta
-    const puntajesPorTipo = {
+  // Función para calcular la nota vigesimal según curso de pregunta
+  const calcularNotaVigesimal = () => {
+    // Mapa con valores por tipo de curso
+    const puntajesPorCurso = {
       "RM": 1.8,         // Razonamiento Matemático - 2 preguntas
       "aritmetica": 2.2, // 1 pregunta
       "algebra": 2.2,    // 1 pregunta
@@ -136,17 +136,36 @@ function App() {
       "quimica": 1.4     // 2 preguntas
     };
     
-    // Contamos preguntas correctas por tipo
+    // Contamos preguntas correctas por curso
     let notaTotal = 0;
     
-    // Asumimos que cada pregunta contiene un campo que indica su tipo
+    // Usamos el campo curso en lugar de tipo
     preguntas.forEach((pregunta) => {
       const respuestaUsuario = respuestas[pregunta.ejercicio];
-      if (respuestaUsuario === pregunta.respuesta_correcta) {
-        // Si la respuesta es correcta, sumamos el puntaje correspondiente al tipo
-        if (pregunta.tipo && puntajesPorTipo[pregunta.tipo]) {
-          notaTotal += puntajesPorTipo[pregunta.tipo];
+      if (respuestaUsuario === pregunta.alt_correcta) {
+        // Si la respuesta es correcta, sumamos el puntaje correspondiente al curso
+        const cursoLower = pregunta.curso ? pregunta.curso.toLowerCase() : "";
+        
+        // Buscamos coincidencias parciales para mapear los cursos
+        let puntajeAsignar = 0;
+        
+        if (cursoLower.includes("razon") || cursoLower.includes("rm")) {
+          puntajeAsignar = puntajesPorCurso["RM"];
+        } else if (cursoLower.includes("aritm")) {
+          puntajeAsignar = puntajesPorCurso["aritmetica"];
+        } else if (cursoLower.includes("algeb")) {
+          puntajeAsignar = puntajesPorCurso["algebra"];
+        } else if (cursoLower.includes("geom")) {
+          puntajeAsignar = puntajesPorCurso["geometria"];
+        } else if (cursoLower.includes("trigo")) {
+          puntajeAsignar = puntajesPorCurso["trigonometria"];
+        } else if (cursoLower.includes("fisi")) {
+          puntajeAsignar = puntajesPorCurso["fisica"];
+        } else if (cursoLower.includes("quim")) {
+          puntajeAsignar = puntajesPorCurso["quimica"];
         }
+        
+        notaTotal += puntajeAsignar;
       }
     });
     
@@ -188,17 +207,17 @@ function App() {
       if (!respuestaUsuario) {
         nuevosResultados[pregunta.ejercicio] = "Sin responder";
         preguntasSinResponder++;
-      } else if (respuestaUsuario === pregunta.respuesta_correcta) {
+      } else if (respuestaUsuario === pregunta.alt_correcta) {
         nuevosResultados[pregunta.ejercicio] = "Correcta";
         preguntasCorrectas++;
       } else {
-        nuevosResultados[pregunta.ejercicio] = `Incorrecta (Respuesta: ${pregunta.respuesta_correcta})`;
+        nuevosResultados[pregunta.ejercicio] = `Incorrecta (Respuesta: ${pregunta.alt_correcta})`;
         preguntasIncorrectas++;
       }
     });
     
-    // Calculamos nota vigesimal en lugar de porcentaje
-    const notaVigesimal = calcularNotaVigesimal(preguntasCorrectas);
+    // Calculamos nota vigesimal usando nuestra función
+    const notaVigesimal = calcularNotaVigesimal();
     const tiempoUsado = tiempoInicial - tiempo; // Tiempo usado en segundos
     
     // Guardar resultados temporalmente
@@ -258,9 +277,9 @@ function App() {
   if (pantalla === "inicio") {
     return (
       <div className="container inicio-container">
-        <h1>EDBOT: Prueba de diagnóstico</h1>
+        <h1>EDBOT: Simulador de Examen</h1>
         <div className="inicio-content">
-          <p>Esta prueba de diagnóstico contiene 10 ejercicios seleccionados de Física que te permitirán evaluar tu nivel de preparación.</p>
+          <p>Este simulacro contiene 10 ejercicios seleccionados de Física que te permitirán evaluar tu nivel de preparación.</p>
           <p>Dispondrás de 40 minutos para resolverlos.</p>
           <p>¡Mucho éxito!</p>
           <button className="boton-iniciar" onClick={iniciarSimulacro}>
@@ -443,7 +462,7 @@ function App() {
               className={`detalle-pregunta ${
                 !respuestas[pregunta.ejercicio] 
                   ? "sin-responder" 
-                  : respuestas[pregunta.ejercicio] === pregunta.respuesta_correcta 
+                  : respuestas[pregunta.ejercicio] === pregunta.alt_correcta 
                     ? "correcta" 
                     : "incorrecta"
               }`}
@@ -454,14 +473,14 @@ function App() {
                 <div className="respuesta-detalle">
                   {!respuestas[pregunta.ejercicio] ? (
                     <span className="estado-respuesta sin-responder">Sin responder</span>
-                  ) : respuestas[pregunta.ejercicio] === pregunta.respuesta_correcta ? (
+                  ) : respuestas[pregunta.ejercicio] === pregunta.alt_correcta ? (
                     <span className="estado-respuesta correcta">
-                      Correcta: {pregunta.respuesta_correcta}
+                      Correcta: {pregunta.alt_correcta}
                     </span>
                   ) : (
                     <span className="estado-respuesta incorrecta">
                       Incorrecta: Elegiste {respuestas[pregunta.ejercicio]}, 
-                      Correcta: {pregunta.respuesta_correcta}
+                      Correcta: {pregunta.alt_correcta}
                     </span>
                   )}
                 </div>
