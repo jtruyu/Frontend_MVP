@@ -120,7 +120,7 @@ function App() {
     }
   };
 
-  // Función para obtener comentario según porcentaje
+  // Función para obtener comentario según nota vigesimal
   const obtenerComentario = (notaVigesimal) => {
     if (notaVigesimal < 8) {
       return "Aún te falta adquirir el nivel necesario para rendir un examen de admisión a la UNI. Continúa practicando y refuerza los conceptos básicos.";
@@ -174,8 +174,40 @@ function App() {
       porcentaje: porcentaje,
       tiempoUsado: tiempoUsado
     });
-    // Establecer el comentario según el porcentaje
-    setComentarioResultado(obtenerComentario(porcentaje));
+    // Establecer el comentario según la nota vigesimal
+    // Calculate vigesimal note
+    const calcularNotaVigesimal = (resultados, preguntas) => {
+      let nota = 0;
+      preguntas.forEach((pregunta) => {
+        if (resultados.detalles[pregunta.ejercicio] === "Correcta") {
+          switch (pregunta.curso) { // Assuming you have 'curso' in your pregunta object
+            case "RM":
+              nota += 1.8;
+              break;
+            case "Aritmética":
+            case "Álgebra":
+            case "Geometría":
+            case "Trigonometría":
+              nota += 2.2;
+              break;
+            case "Física":
+              nota += 2.4;
+              break;
+            case "Química":
+              nota += 1.4;
+              break;
+            default:
+              nota += 0; // Or handle this case as you see fit
+          }
+        }
+      });
+      return nota;
+    };
+
+    const notaVigesimal = calcularNotaVigesimal(nuevosResultados, preguntas);
+
+
+    setComentarioResultado(obtenerComentario(notaVigesimal));
     // Mostrar pantalla de formulario para recoger datos del usuario
     setPantalla("formulario");
   };
@@ -423,34 +455,4 @@ function App() {
           </div>
           <div className="estadistica incorrecta">
             <div className="valor">{resultados.incorrectas}</div>
-            <div className="etiqueta">Incorrectas</div>
-
-          </div>
-          <div className="estadistica">
-            <div className="valor">{resultados.sinResponder}</div>
-            <div className="etiqueta">Sin responder</div>
-          </div>
-          <div className="estadistica">
-            <div className="valor">{notaVigesimal.toFixed(2)}</div>  {/* Display vigesimal note */}
-            <div className="etiqueta">Nota Vigesimal</div>
-          </div>
-        </div>
-
-        <div className="comentario-resultado">
-          <h2>Evaluación de tu desempeño</h2>
-          <p>{obtenerComentario(notaVigesimal)}</p>  {/* Use notaVigesimal here */}
-        </div>
-
-        <h2>Detalle de respuestas</h2>
-
-        <div className="lista-detalles">
-
-          {preguntas.map((pregunta, index) => (
-            <div
-              key={pregunta.ejercicio}
-              className={`detalle-pregunta ${
-                !respuestas[pregunta.ejercicio]
-                  ? "sin-responder"
-                  : respuestas[pregunta.ejercicio] === pregunta.respuesta_correcta
-                    ? "correcta"
-                    : "
+            <div className="etiqueta">Incorrect
