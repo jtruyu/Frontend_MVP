@@ -153,15 +153,15 @@ function App() {
           puntajeAsignar = puntajesPorCurso["RM"];
         } else if (cursoLower.includes("aritm")) {
           puntajeAsignar = puntajesPorCurso["aritmetica"];
-        } else if (cursoLower.includes("algeb")) {
+        } else if (cursoLower.includes("álgeb")) {
           puntajeAsignar = puntajesPorCurso["algebra"];
         } else if (cursoLower.includes("geom")) {
           puntajeAsignar = puntajesPorCurso["geometria"];
         } else if (cursoLower.includes("trigo")) {
           puntajeAsignar = puntajesPorCurso["trigonometria"];
-        } else if (cursoLower.includes("fisi")) {
+        } else if (cursoLower.includes("físi")) {
           puntajeAsignar = puntajesPorCurso["fisica"];
-        } else if (cursoLower.includes("quim")) {
+        } else if (cursoLower.includes("quím")) {
           puntajeAsignar = puntajesPorCurso["quimica"];
         }
         
