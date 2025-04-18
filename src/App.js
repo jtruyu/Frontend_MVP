@@ -11,14 +11,15 @@ function App() {
   // Cambiamos el flujo de pantallas: inicio -> simulacro -> formulario -> resultados
   const [pantalla, setPantalla] = useState("inicio");
   const [tiempo, setTiempo] = useState(40 * 60); // 40 minutos en segundos
-  const [tiempoInicial] = useState(40 * 60);
-  // Guardar el tiempo inicial para calcular tiempo usado
+  const [tiempoInicial] = useState(40 * 60); // Guardar el tiempo inicial para calcular tiempo usado
   const [tiempoActivo, setTiempoActivo] = useState(false);
+  
   // Estado para los datos del usuario (ahora se llenarán al final)
   const [datosUsuario, setDatosUsuario] = useState({
     nombre: "",
     correo: ""
   });
+  
   // Estado para mensaje de comentario según resultado
   const [comentarioResultado, setComentarioResultado] = useState("");
   // Estado para almacenar resultados temporales antes de pedir datos del usuario
@@ -80,12 +81,14 @@ function App() {
     setTiempo(40 * 60); // Reiniciar el tiempo a 40 minutos
     setTiempoActivo(true);
     setPantalla("simulacro");
+    
     try {
       const response = await axios.get("https://mi-proyecto-fastapi.onrender.com/simulacro", {
-        params: {
+        params: { 
           num_preguntas: 10 // Solicitamos 10 preguntas
         }
       });
+
       if (response.data && response.data.length > 0) {
         setPreguntas(response.data);
       } else {
@@ -120,19 +123,50 @@ function App() {
     }
   };
 
+  // Función para calcular la nota vigesimal según tipo de pregunta
+  const calcularNotaVigesimal = (preguntasCorrectas) => {
+    // Mapa con valores por tipo de pregunta
+    const puntajesPorTipo = {
+      "RM": 1.8,         // Razonamiento Matemático - 2 preguntas
+      "aritmetica": 2.2, // 1 pregunta
+      "algebra": 2.2,    // 1 pregunta
+      "geometria": 2.2,  // 1 pregunta
+      "trigonometria": 2.2, // 1 pregunta
+      "fisica": 2.4,     // 2 preguntas
+      "quimica": 1.4     // 2 preguntas
+    };
+    
+    // Contamos preguntas correctas por tipo
+    let notaTotal = 0;
+    
+    // Asumimos que cada pregunta contiene un campo que indica su tipo
+    preguntas.forEach((pregunta) => {
+      const respuestaUsuario = respuestas[pregunta.ejercicio];
+      if (respuestaUsuario === pregunta.respuesta_correcta) {
+        // Si la respuesta es correcta, sumamos el puntaje correspondiente al tipo
+        if (pregunta.tipo && puntajesPorTipo[pregunta.tipo]) {
+          notaTotal += puntajesPorTipo[pregunta.tipo];
+        }
+      }
+    });
+    
+    // Redondeamos a un decimal
+    return Math.round(notaTotal * 10) / 10;
+  };
+
   // Función para obtener comentario según nota vigesimal
-  const obtenerComentario = (notaVigesimal) => {
-    if (notaVigesimal < 8) {
+  const obtenerComentario = (nota) => {
+    if (nota < 8) {
       return "Aún te falta adquirir el nivel necesario para rendir un examen de admisión a la UNI. Continúa practicando y refuerza los conceptos básicos.";
-    } else if (notaVigesimal < 10) {
+    } else if (nota < 10) {
       return "Tienes opciones, pero muy bajas, de ingresar a la UNI. Enfócate en mejorar tus áreas más débiles y practica con más intensidad.";
-    } else if (notaVigesimal < 12) {
+    } else if (nota < 12) {
       return "Tienes opciones de ingreso, pero sin asegurar. Continúa trabajando en las áreas donde tuviste dificultades para aumentar tus probabilidades.";
-    } else if (notaVigesimal < 14) {
+    } else if (nota < 14) {
       return "¡Tienes buenas opciones de ingreso! Estás en el camino correcto, sigue practicando para consolidar tus conocimientos.";
-    } else if (notaVigesimal < 16) {
+    } else if (nota < 16) {
       return "¡Tu ingreso es prácticamente seguro! Mantén el ritmo de estudio y prepárate para destacar en la universidad.";
-    } else if (notaVigesimal < 18) {
+    } else if (nota < 18) {
       return "¡Excelente! Estás luchando para ser de los primeros puestos de tu carrera. Continúa con esta dedicación.";
     } else {
       return "¡Impresionante! Con este nivel estás preparado para estar en el cómputo general y entre los mejores ingresantes. ¡Felicitaciones!";
@@ -141,15 +175,16 @@ function App() {
 
   const finalizarSimulacro = () => {
     setTiempoActivo(false);
+    
     // Calcular resultados
     let nuevosResultados = {};
     let preguntasCorrectas = 0;
     let preguntasIncorrectas = 0;
     let preguntasSinResponder = 0;
-
+    
     preguntas.forEach((pregunta) => {
       const respuestaUsuario = respuestas[pregunta.ejercicio];
-
+      
       if (!respuestaUsuario) {
         nuevosResultados[pregunta.ejercicio] = "Sin responder";
         preguntasSinResponder++;
@@ -161,56 +196,28 @@ function App() {
         preguntasIncorrectas++;
       }
     });
-    const porcentaje = (preguntasCorrectas / preguntas.length) * 100;
-    const tiempoUsado = tiempoInicial - tiempo;
-    // Tiempo usado en segundos
-
+    
+    // Calculamos nota vigesimal en lugar de porcentaje
+    const notaVigesimal = calcularNotaVigesimal(preguntasCorrectas);
+    const tiempoUsado = tiempoInicial - tiempo; // Tiempo usado en segundos
+    
     // Guardar resultados temporalmente
     setResultadosTemporales({
       detalles: nuevosResultados,
       correctas: preguntasCorrectas,
       incorrectas: preguntasIncorrectas,
       sinResponder: preguntasSinResponder,
-      porcentaje: porcentaje,
+      notaVigesimal: notaVigesimal,
       tiempoUsado: tiempoUsado
     });
+    
     // Establecer el comentario según la nota vigesimal
-    // Calculate vigesimal note
-    const calcularNotaVigesimal = (resultados, preguntas) => {
-      let nota = 0;
-      preguntas.forEach((pregunta) => {
-        if (resultados.detalles[pregunta.ejercicio] === "Correcta") {
-          switch (pregunta.curso) { // Assuming you have 'curso' in your pregunta object
-            case "RM":
-              nota += 1.8;
-              break;
-            case "Aritmética":
-            case "Álgebra":
-            case "Geometría":
-            case "Trigonometría":
-              nota += 2.2;
-              break;
-            case "Física":
-              nota += 2.4;
-              break;
-            case "Química":
-              nota += 1.4;
-              break;
-            default:
-              nota += 0; // Or handle this case as you see fit
-          }
-        }
-      });
-      return nota;
-    };
-
-    const notaVigesimal = calcularNotaVigesimal(nuevosResultados, preguntas);
-
-
     setComentarioResultado(obtenerComentario(notaVigesimal));
+    
     // Mostrar pantalla de formulario para recoger datos del usuario
     setPantalla("formulario");
   };
+
   // Nueva función para procesar el formulario y mostrar resultados
   const procesarFormulario = async () => {
     if (!validarFormulario()) {
@@ -220,12 +227,13 @@ function App() {
 
     // Establecer los resultados finales
     setResultados(resultadosTemporales);
+    
     // Guardar los resultados en la base de datos
     try {
       await axios.post("https://mi-proyecto-fastapi.onrender.com/guardar-resultado", {
         nombre: datosUsuario.nombre,
         correo: datosUsuario.correo,
-        resultado: resultadosTemporales.porcentaje,
+        nota: resultadosTemporales.notaVigesimal,
         preguntas_correctas: resultadosTemporales.correctas,
         preguntas_incorrectas: resultadosTemporales.incorrectas,
         preguntas_sin_responder: resultadosTemporales.sinResponder,
@@ -235,15 +243,17 @@ function App() {
     } catch (error) {
       console.error("Error al guardar el resultado:", error);
     }
-
+    
     // Mostrar pantalla de resultados
     setPantalla("resultados");
   };
+
   const formatoTiempo = (segundos) => {
     const minutos = Math.floor(segundos / 60);
     const segundosRestantes = segundos % 60;
-    return `<span class="math-inline">\{minutos\.toString\(\)\.padStart\(2, '0'\)\}\:</span>{segundosRestantes.toString().padStart(2, '0')}`;
+    return `${minutos.toString().padStart(2, '0')}:${segundosRestantes.toString().padStart(2, '0')}`;
   };
+  
   // Pantalla de inicio
   if (pantalla === "inicio") {
     return (
@@ -253,7 +263,6 @@ function App() {
           <p>Este simulacro contiene 10 ejercicios seleccionados de Física que te permitirán evaluar tu nivel de preparación.</p>
           <p>Dispondrás de 40 minutos para resolverlos.</p>
           <p>¡Mucho éxito!</p>
-
           <button className="boton-iniciar" onClick={iniciarSimulacro}>
             Comenzar
           </button>
@@ -261,7 +270,7 @@ function App() {
       </div>
     );
   }
-
+  
   // Nueva pantalla de formulario (después del simulacro)
   if (pantalla === "formulario") {
     return (
@@ -269,81 +278,73 @@ function App() {
         <h1>¡Simulacro completado!</h1>
         <div className="formulario-content">
           <p>Por favor, completa tus datos para ver tus resultados:</p>
-
+          
           <form className="formulario-registro">
-            <div
-              className="campo-formulario">
+            <div className="campo-formulario">
               <label htmlFor="nombre">Nombre completo:</label>
-              <input
-                type="text"
-                id="nombre"
-                name="nombre"
+              <input 
+                type="text" 
+                id="nombre" 
+                name="nombre" 
                 value={datosUsuario.nombre}
-
                 onChange={handleInputChange}
                 placeholder="Ingresa tu nombre completo"
                 required
               />
             </div>
-
-            <div
-              className="campo-formulario">
+            
+            <div className="campo-formulario">
               <label htmlFor="correo">Correo electrónico:</label>
-              <input
-                type="email"
-                id="correo"
-                name="correo"
+              <input 
+                type="email" 
+                id="correo" 
+                name="correo" 
                 value={datosUsuario.correo}
-
                 onChange={handleInputChange}
                 placeholder="Ingresa tu correo electrónico"
                 required
               />
             </div>
-
-            <div
-              className="formulario-info">
+            
+            <div className="formulario-info">
               <p>Estos datos nos permitirán enviarte información sobre tus resultados y
                 recomendaciones personalizadas para mejorar tu desempeño.</p>
             </div>
-
-            <button
-              type="button"
-
-              className="boton-ver-resultados"
-              onClick={procesarFormulario}
+            
+            <button 
+              type="button" 
+              className="boton-ver-resultados" 
+              onClick={procesarFormulario} 
               disabled={!validarFormulario()}
             >
               Ver mis resultados
             </button>
           </form>
         </div>
-
       </div>
     );
   }
-
+  
   // Pantalla de simulacro
   if (pantalla === "simulacro" && preguntas.length > 0) {
     const pregunta = preguntas[preguntaActual];
+    
     return (
       <div className="container simulacro-container">
         <div className="encabezado-simulacro">
           <div className="progreso">
             <div className="texto-progreso">Pregunta: {preguntaActual + 1} de {preguntas.length}</div>
             <div className="barra-progreso">
-              <div
-                className="progreso-completado"
-
+              <div 
+                className="progreso-completado" 
                 style={{ width: `${((preguntaActual + 1) / preguntas.length) * 100}%` }}
               ></div>
             </div>
           </div>
           <div className="temporizador">⏱️ {formatoTiempo(tiempo)}</div>
         </div>
-
+        
         <div className="pregunta-container" key={pregunta.ejercicio}>
-
           <h2 className="ejercicio-texto">
             <span dangerouslySetInnerHTML={{ __html: pregunta.ejercicio }}></span>
           </h2>
@@ -354,45 +355,40 @@ function App() {
 
           <ul className="opciones-lista">
             {pregunta.alternativas.map((alt) => (
-
               <li key={alt.letra} className="opcion">
                 <label>
                   <input
                     type="radio"
                     name={`pregunta-${pregunta.ejercicio}`}
-
                     value={alt.letra}
                     checked={respuestas[pregunta.ejercicio] === alt.letra}
                     onChange={() => seleccionarRespuesta(pregunta.ejercicio, alt.letra)}
                   />
                   <span className="texto-opcion">{alt.letra}: </span>
-
                   <span className="texto-opcion" dangerouslySetInnerHTML={{ __html: alt.texto }}></span>
                 </label>
               </li>
             ))}
           </ul>
         </div>
-
+        
         <div className="controles-navegacion">
-          <button
-
-            className="boton-nav"
-            onClick={preguntaAnterior}
+          <button 
+            className="boton-nav" 
+            onClick={preguntaAnterior} 
             disabled={preguntaActual === 0}
           >
             Anterior
           </button>
-
+          
           {preguntaActual === preguntas.length - 1 ? (
             <button className="boton-finalizar" onClick={finalizarSimulacro}>
               Finalizar simulacro
             </button>
           ) : (
-            <button
-              className="boton-nav"
+            <button 
+              className="boton-nav" 
               onClick={siguientePregunta}
-
             >
               Siguiente
             </button>
@@ -401,53 +397,19 @@ function App() {
       </div>
     );
   }
-
+  
   // Pantalla de resultados
   if (pantalla === "resultados") {
-
-    // Function to calculate vigesimal note
-    const calcularNotaVigesimal = (resultados, preguntas) => {
-      let nota = 0;
-      preguntas.forEach((pregunta) => {
-        if (resultados.detalles[pregunta.ejercicio] === "Correcta") {
-          switch (pregunta.curso) { // Assuming 'curso' is a property in your question object
-            case "RM":
-              nota += 1.8;
-              break;
-            case "Aritmética":
-            case "Álgebra":
-            case "Geometría":
-            case "Trigonometría":
-              nota += 2.2;
-              break;
-            case "Física":
-              nota += 2.4;
-              break;
-            case "Química":
-              nota += 1.4;
-              break;
-            default:
-              nota += 0; // Or handle this case as needed
-          }
-        }
-      }
-      );
-      return nota;
-    };
-
-    const notaVigesimal = calcularNotaVigesimal(resultadosTemporales, preguntas); // Calculate the note here
-
-
     return (
       <div className="container resultados-container">
         <h1>Resultados del Simulacro</h1>
-
+        
         <div className="datos-usuario">
           <p><strong>Nombre:</strong> {datosUsuario.nombre}</p>
           <p><strong>Correo:</strong> {datosUsuario.correo}</p>
           <p><strong>Tiempo utilizado:</strong> {formatoTiempo(resultados.tiempoUsado)}</p>
         </div>
-
+        
         <div className="resumen-resultados">
           <div className="estadistica correcta">
             <div className="valor">{resultados.correctas}</div>
@@ -455,4 +417,73 @@ function App() {
           </div>
           <div className="estadistica incorrecta">
             <div className="valor">{resultados.incorrectas}</div>
-            <div className="etiqueta">Incorrect
+            <div className="etiqueta">Incorrectas</div>
+          </div>
+          <div className="estadistica">
+            <div className="valor">{resultados.sinResponder}</div>
+            <div className="etiqueta">Sin responder</div>
+          </div>
+          <div className="estadistica">
+            <div className="valor">{resultados.notaVigesimal.toFixed(1)}</div>
+            <div className="etiqueta">Nota (0-20)</div>
+          </div>
+        </div>
+        
+        <div className="comentario-resultado">
+          <h2>Evaluación de tu desempeño</h2>
+          <p>{comentarioResultado}</p>
+        </div>
+        
+        <h2>Detalle de respuestas</h2>
+        
+        <div className="lista-detalles">
+          {preguntas.map((pregunta, index) => (
+            <div 
+              key={pregunta.ejercicio} 
+              className={`detalle-pregunta ${
+                !respuestas[pregunta.ejercicio] 
+                  ? "sin-responder" 
+                  : respuestas[pregunta.ejercicio] === pregunta.respuesta_correcta 
+                    ? "correcta" 
+                    : "incorrecta"
+              }`}
+            >
+              <div className="numero-pregunta">{index + 1}</div>
+              <div className="contenido-detalle">
+                <div className="texto-ejercicio" dangerouslySetInnerHTML={{ __html: pregunta.ejercicio }}></div>
+                <div className="respuesta-detalle">
+                  {!respuestas[pregunta.ejercicio] ? (
+                    <span className="estado-respuesta sin-responder">Sin responder</span>
+                  ) : respuestas[pregunta.ejercicio] === pregunta.respuesta_correcta ? (
+                    <span className="estado-respuesta correcta">
+                      Correcta: {pregunta.respuesta_correcta}
+                    </span>
+                  ) : (
+                    <span className="estado-respuesta incorrecta">
+                      Incorrecta: Elegiste {respuestas[pregunta.ejercicio]}, 
+                      Correcta: {pregunta.respuesta_correcta}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <button className="boton-reiniciar" onClick={() => setPantalla("inicio")}>
+          Volver al inicio
+        </button>
+      </div>
+    );
+  }
+  
+  // Pantalla de carga
+  return (
+    <div className="container cargando-container">
+      <div className="spinner"></div>
+      <p>Cargando simulacro...</p>
+    </div>
+  );
+}
+
+export default App;
