@@ -83,7 +83,7 @@ function App() {
     setPantalla("simulacro");
     
     try {
-      const response = await axios.get("https://mi-proyecto-fastapi.onrender.com/simulacro", {
+      const response = await axios.get("https://backend-mvp-a6w0.onrender.com/simulacro", {
         params: { 
           num_preguntas: 10 // Solicitamos 10 preguntas
         }
@@ -230,7 +230,7 @@ function App() {
     
     // Guardar los resultados en la base de datos
     try {
-      await axios.post("https://mi-proyecto-fastapi.onrender.com/guardar-resultado", {
+      await axios.post("https://backend-mvp-a6w0.onrender.com/guardar-resultado", {
         nombre: datosUsuario.nombre,
         correo: datosUsuario.correo,
         nota: resultadosTemporales.notaVigesimal,
@@ -258,9 +258,9 @@ function App() {
   if (pantalla === "inicio") {
     return (
       <div className="container inicio-container">
-        <h1>EDBOT: Simulador de Examen</h1>
+        <h1>EDBOT: Prueba de diagnóstico</h1>
         <div className="inicio-content">
-          <p>Este simulacro contiene 10 ejercicios seleccionados de Física que te permitirán evaluar tu nivel de preparación.</p>
+          <p>Esta prueba de diagnóstico contiene 10 ejercicios seleccionados de Física que te permitirán evaluar tu nivel de preparación.</p>
           <p>Dispondrás de 40 minutos para resolverlos.</p>
           <p>¡Mucho éxito!</p>
           <button className="boton-iniciar" onClick={iniciarSimulacro}>
