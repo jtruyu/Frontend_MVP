@@ -222,9 +222,9 @@ function App() {
   if (pantalla === "inicio") {
     return (
       <div className="container inicio-container">
-        <h1>EDBOT: Simulador de Examen</h1>
+        <h1>EDBOT: Prueba de dignóstico</h1>
         <div className="inicio-content">
-          <p>Este simulacro contiene 11 ejercicios de admisión que te permitirán evaluar tu nivel de preparación.</p>
+          <p>Esta prueba de diagnóstico contiene 10 ejercicios de admisión que te permitirán evaluar tu nivel de preparación.</p>
           <p>Los ejercicios incluyen cursos como RM, Aritmética, Álgebra, Geometría, Trigonometría, Física y Química.</p>
           <p>Dispondrás de 40 minutos para resolverlos.</p>
           <p>¡Mucho éxito!</p>
