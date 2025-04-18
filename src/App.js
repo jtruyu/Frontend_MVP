@@ -194,7 +194,7 @@ function App() {
     
     // Guardar los resultados en la base de datos
     try {
-      await axios.post("https://https://backend-mvp-a6w0.onrender.com/guardar-resultado", {
+      await axios.post("https://backend-mvp-a6w0.onrender.com/guardar-resultado", {
         nombre: datosUsuario.nombre,
         correo: datosUsuario.correo,
         resultado: resultadosTemporales.porcentaje,
