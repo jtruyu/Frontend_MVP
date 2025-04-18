@@ -98,7 +98,7 @@ function App() {
     setPantalla("simulacro");
     
     try {
-      const response = await axios.get("https://mi-proyecto-fastapi.onrender.com/simulacro", {
+      const response = await axios.get("https://backend-mvp-a6w0.onrender.com/simulacro", {
         params: { 
           num_preguntas: 10 // Solicitamos 10 preguntas
         }
