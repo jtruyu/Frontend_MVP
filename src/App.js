@@ -265,10 +265,10 @@ function App() {
   };
   
   // Pantalla de inicio
-  if (pantalla === "inicio") {
+    iif (pantalla === "inicio") {
     return (
       <div className="container inicio-container">
-        <h1>EDBOT: Prueba de diagnóstico</h1>
+        <h1>EDBOT<br />Prueba de diagnóstico</h1>
         <div className="inicio-content">
           <p>Esta prueba de diagnóstico contiene 10 ejercicios seleccionados de exámenes de admisión a la Universidad Nacional de Ingeniería (UNI), que te permitirán evaluar tu nivel de preparación.</p>
           <p>Dispondrás de 40 minutos para resolverlos.</p>
