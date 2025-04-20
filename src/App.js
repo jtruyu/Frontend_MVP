@@ -265,7 +265,7 @@ function App() {
   };
   
   // Pantalla de inicio
-    iif (pantalla === "inicio") {
+    if (pantalla === "inicio") {
     return (
       <div className="container inicio-container">
         <h1>EDBOT<br />Prueba de diagnóstico</h1>
