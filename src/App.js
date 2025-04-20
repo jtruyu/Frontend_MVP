@@ -163,21 +163,15 @@ function App() {
   };
 
   // Función para obtener comentario según nota vigesimal
-  const obtenerComentario = (notaVigesimal) => {
-    if (notaVigesimal < 8) {
-      return "Aún te falta adquirir el nivel necesario para rendir un examen de admisión a la UNI. Continúa practicando y refuerza los conceptos básicos.";
-    } else if (notaVigesimal < 10) {
-      return "Tienes opciones, pero muy bajas, de ingresar a la UNI. Enfócate en mejorar tus áreas más débiles y practica con más intensidad.";
-    } else if (notaVigesimal < 12) {
-      return "Tienes opciones de ingreso, pero sin asegurar. Continúa trabajando en las áreas donde tuviste dificultades para aumentar tus probabilidades.";
+   const obtenerComentario = (notaVigesimal) => {
+    if (notaVigesimal < 10) {
+      return "Es necesario fortalecer tu base para el examen de admisión a la UNI. Te animamos a practicar con dedicación y a revisar los conceptos fundamentales.";
     } else if (notaVigesimal < 14) {
-      return "¡Tienes buenas opciones de ingreso! Estás en el camino correcto, sigue practicando para consolidar tus conocimientos.";
-    } else if (notaVigesimal < 16) {
-      return "¡Tu ingreso es prácticamente seguro! Mantén el ritmo de estudio y prepárate para destacar en la universidad.";
+      return "Tienes potencial para lograr el ingreso a la UNI, pero se requiere mayor consistencia. Identifica tus áreas de oportunidad y trabaja intensamente en ellas.";
     } else if (notaVigesimal < 18) {
-      return "¡Excelente! Estás luchando para ser de los primeros puestos de tu carrera. Continúa con esta dedicación.";
+      return "¡Vas por buen camino! Estás demostrando un buen nivel de preparación. Continúa practicando para afianzar tus conocimientos y aumentar tus posibilidades de éxito.";
     } else {
-      return "¡Impresionante! Con este nivel estás preparado para estar en el cómputo general y entre los mejores ingresantes. ¡Felicitaciones!";
+      return "¡Excelente desempeño! Tu preparación te posiciona para competir por los primeros puestos. ¡Sigue así y alcanzarás tus metas!";
     }
   };
 
