@@ -1,55 +1,56 @@
-// Archivo App.js actualizado
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
 function App() {
   const [pantalla, setPantalla] = useState("inicio");
-  const [tipoPrueba, setTipoPrueba] = useState("");
+  const [tipoPrueba, setTipoPrueba] = useState("diagnostico");
   const [preguntas, setPreguntas] = useState([]);
-  const [preguntaActual, setPreguntaActual] = useState(0);
   const [respuestas, setRespuestas] = useState({});
-  const [tiempo, setTiempo] = useState(0);
-  const [tiempoInicial, setTiempoInicial] = useState(0);
+  const [preguntaActual, setPreguntaActual] = useState(0);
+  const [tiempo, setTiempo] = useState(40 * 60);
+  const [tiempoInicial, setTiempoInicial] = useState(40 * 60);
   const [tiempoActivo, setTiempoActivo] = useState(false);
   const [datosUsuario, setDatosUsuario] = useState({ nombre: "", correo: "" });
   const [resultados, setResultados] = useState(null);
+  const [resultadosTemporales, setResultadosTemporales] = useState(null);
+  const [comentarioResultado, setComentarioResultado] = useState("");
 
   useEffect(() => {
-    let timer;
+    let intervalo;
     if (tiempoActivo && tiempo > 0) {
-      timer = setInterval(() => setTiempo(t => t - 1), 1000);
-    } else if (tiempo === 0 && tiempoActivo) {
-      finalizar();
+      intervalo = setInterval(() => setTiempo((t) => t - 1), 1000);
+    } else if (tiempo === 0) {
+      finalizarSimulacro();
     }
-    return () => clearInterval(timer);
-  }, [tiempo, tiempoActivo]);
+    return () => clearInterval(intervalo);
+  }, [tiempoActivo, tiempo]);
 
   const iniciarPrueba = async (tipo) => {
     setTipoPrueba(tipo);
-    setPantalla("cargando");
-    setRespuestas({});
-    setPreguntaActual(0);
-    setTiempo(tipo === "diagnostico" ? 40 * 60 : 108 * 60);
-    setTiempoInicial(tipo === "diagnostico" ? 40 * 60 : 108 * 60);
+    const duracion = tipo === "simulacro" ? 108 * 60 : 40 * 60;
+    setTiempo(duracion);
+    setTiempoInicial(duracion);
     setTiempoActivo(true);
+    setPreguntaActual(0);
+    setRespuestas({});
+    setPantalla("simulacro");
 
     try {
-      const endpoint = tipo === "diagnostico" ? "/simulacro" : "/simulacro_completo";
+      const endpoint = tipo === "simulacro" ? "/simulacro_completo" : "/simulacro";
       const { data } = await axios.get(`https://backend-mvp-a6w0.onrender.com${endpoint}`);
       setPreguntas(data);
-      setPantalla("simulacro");
-    } catch (err) {
+    } catch {
       alert("Error al cargar preguntas.");
       setPantalla("inicio");
     }
   };
 
   const seleccionarRespuesta = (ejercicio, letra) => {
-    setRespuestas(r => ({ ...r, [ejercicio]: letra }));
+    setRespuestas({ ...respuestas, [ejercicio]: letra });
   };
 
-  const calcularPuntaje = (curso) => {
+  const calcularPuntajePorCurso = (curso) => {
     if (tipoPrueba === "simulacro") {
       switch (curso) {
         case "RM":
@@ -76,99 +77,157 @@ function App() {
     }
   };
 
-  const finalizar = () => {
+  const finalizarSimulacro = () => {
     setTiempoActivo(false);
     let correctas = 0, incorrectas = 0, sinResp = 0, nota = 0;
     const detalles = {};
 
-    preguntas.forEach(p => {
+    preguntas.forEach((p) => {
       const r = respuestas[p.ejercicio];
       if (!r) {
         sinResp++;
         detalles[p.ejercicio] = "Sin responder";
       } else if (r === p.respuesta_correcta) {
         correctas++;
+        nota += calcularPuntajePorCurso(p.curso);
         detalles[p.ejercicio] = "Correcta";
-        nota += calcularPuntaje(p.curso);
       } else {
         incorrectas++;
-        detalles[p.ejercicio] = `Incorrecta (Correcta: ${p.respuesta_correcta})`;
+        detalles[p.ejercicio] = `Incorrecta (Respuesta: ${p.respuesta_correcta})`;
       }
     });
 
     nota = Math.min(nota, 20);
-    setResultados({ correctas, incorrectas, sinResp, nota, tiempoUsado: tiempoInicial - tiempo, detalles });
+    const resultado = {
+      correctas,
+      incorrectas,
+      sinResp,
+      nota,
+      detalles,
+      tiempoUsado: tiempoInicial - tiempo,
+    };
+    setResultadosTemporales(resultado);
     setPantalla("formulario");
   };
 
-  const enviarResultado = async () => {
-    if (!datosUsuario.nombre || !datosUsuario.correo) return alert("Datos incompletos");
+  const procesarFormulario = async () => {
+    if (!datosUsuario.nombre || !datosUsuario.correo.includes("@")) {
+      alert("Por favor completa todos los campos correctamente.");
+      return;
+    }
+
+    const r = resultadosTemporales;
+    setResultados(r);
+
     try {
       await axios.post("https://backend-mvp-a6w0.onrender.com/guardar-resultado", {
         nombre: datosUsuario.nombre,
         correo: datosUsuario.correo,
-        resultado: resultados.nota,
-        preguntas_correctas: resultados.correctas,
-        preguntas_incorrectas: resultados.incorrectas,
-        preguntas_sin_responder: resultados.sinResp,
-        tiempo_usado: resultados.tiempoUsado
+        resultado: r.nota,
+        preguntas_correctas: r.correctas,
+        preguntas_incorrectas: r.incorrectas,
+        preguntas_sin_responder: r.sinResp,
+        tiempo_usado: r.tiempoUsado,
       });
-      setPantalla("resultados");
-    } catch (e) {
+    } catch {
       alert("Error al guardar resultados");
     }
+
+    setPantalla("resultados");
   };
 
-  const formatoTiempo = (s) => `${Math.floor(s/60).toString().padStart(2,"0")}:${(s%60).toString().padStart(2,"0")}`;
+  const formatoTiempo = (s) =>
+    `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
 
   if (pantalla === "inicio") {
-    return <div><h1>Pruebas</h1>
-      <button onClick={() => iniciarPrueba("diagnostico")}>Diagnóstico (10)</button>
-      <button onClick={() => iniciarPrueba("simulacro")}>Simulacro (30)</button></div>;
+    return (
+      <div className="container inicio-container">
+        <h1>EDBOT</h1>
+        <p>Selecciona una evaluación:</p>
+        <button onClick={() => iniciarPrueba("diagnostico")}>Prueba Diagnóstica</button>
+        <button onClick={() => iniciarPrueba("simulacro")}>Simulacro Completo</button>
+      </div>
+    );
   }
 
-  if (pantalla === "simulacro") {
+  if (pantalla === "simulacro" && preguntas.length > 0) {
     const p = preguntas[preguntaActual];
-    return <div>
-      <h2>{`Pregunta ${preguntaActual + 1}/${preguntas.length}`}</h2>
-      <div dangerouslySetInnerHTML={{ __html: p.ejercicio }} />
-      {p.alternativas.map(alt => (
-        <label key={alt.letra}>
-          <input type="radio" name="resp" checked={respuestas[p.ejercicio] === alt.letra}
-            onChange={() => seleccionarRespuesta(p.ejercicio, alt.letra)} />
-          {alt.letra}: <span dangerouslySetInnerHTML={{ __html: alt.texto }} />
-        </label>
-      ))}
-      <div>
-        <button onClick={() => setPreguntaActual(p => p - 1)} disabled={preguntaActual === 0}>Anterior</button>
-        {preguntaActual < preguntas.length - 1 ?
-          <button onClick={() => setPreguntaActual(p => p + 1)}>Siguiente</button>
-          : <button onClick={finalizar}>Finalizar</button>}
+    return (
+      <div className="container simulacro-container">
+        <div className="encabezado-simulacro">
+          <div className="progreso">
+            <div>Pregunta {preguntaActual + 1} de {preguntas.length}</div>
+            <div className="barra-progreso">
+              <div
+                className="progreso-completado"
+                style={{ width: `${((preguntaActual + 1) / preguntas.length) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+          <div className="temporizador">⏱️ {formatoTiempo(tiempo)}</div>
+        </div>
+        <h2 dangerouslySetInnerHTML={{ __html: p.ejercicio }} />
+        <ul className="opciones-lista">
+          {p.alternativas.map((alt) => (
+            <li key={alt.letra}>
+              <label>
+                <input
+                  type="radio"
+                  name={`pregunta-${p.ejercicio}`}
+                  value={alt.letra}
+                  checked={respuestas[p.ejercicio] === alt.letra}
+                  onChange={() => seleccionarRespuesta(p.ejercicio, alt.letra)}
+                />
+                <span dangerouslySetInnerHTML={{ __html: `${alt.letra}: ${alt.texto}` }} />
+              </label>
+            </li>
+          ))}
+        </ul>
+        <button onClick={preguntaAnterior} disabled={preguntaActual === 0}>Anterior</button>
+        {preguntaActual === preguntas.length - 1 ? (
+          <button onClick={finalizarSimulacro}>Finalizar</button>
+        ) : (
+          <button onClick={siguientePregunta}>Siguiente</button>
+        )}
       </div>
-      <p>Tiempo: {formatoTiempo(tiempo)}</p>
-    </div>;
+    );
   }
 
   if (pantalla === "formulario") {
-    return <div>
-      <h2>Ingresa tus datos</h2>
-      <input placeholder="Nombre" value={datosUsuario.nombre} onChange={e => setDatosUsuario({...datosUsuario, nombre: e.target.value})} />
-      <input placeholder="Correo" value={datosUsuario.correo} onChange={e => setDatosUsuario({...datosUsuario, correo: e.target.value})} />
-      <button onClick={enviarResultado}>Enviar</button>
-    </div>;
+    return (
+      <div className="container formulario-container">
+        <h2>Ingresa tus datos</h2>
+        <input
+          placeholder="Nombre completo"
+          value={datosUsuario.nombre}
+          onChange={(e) => setDatosUsuario({ ...datosUsuario, nombre: e.target.value })}
+        />
+        <input
+          placeholder="Correo electrónico"
+          value={datosUsuario.correo}
+          onChange={(e) => setDatosUsuario({ ...datosUsuario, correo: e.target.value })}
+        />
+        <button onClick={procesarFormulario}>Ver resultados</button>
+      </div>
+    );
   }
 
   if (pantalla === "resultados") {
-    return <div>
-      <h2>{tipoPrueba === "simulacro" ? "Resultados enviados" : "Tu resultado"}</h2>
-      {tipoPrueba === "diagnostico" && resultados && (
-        <p>Nota: {resultados.nota.toFixed(1)}</p>
-      )}
-      <button onClick={() => setPantalla("inicio")}>Volver al inicio</button>
-    </div>;
+    return (
+      <div className="container resultados-container">
+        <h1>Resultados del {tipoPrueba === "simulacro" ? "Simulacro" : "Diagnóstico"}</h1>
+        <p><strong>Nombre:</strong> {datosUsuario.nombre}</p>
+        <p><strong>Correo:</strong> {datosUsuario.correo}</p>
+        <p><strong>Nota:</strong> {resultados.nota.toFixed(1)}</p>
+        <p><strong>Correctas:</strong> {resultados.correctas}</p>
+        <p><strong>Incorrectas:</strong> {resultados.incorrectas}</p>
+        <p><strong>Sin responder:</strong> {resultados.sinResp}</p>
+        <button onClick={() => setPantalla("inicio")}>Volver al inicio</button>
+      </div>
+    );
   }
 
-  return <p>Cargando...</p>;
+  return <div className="cargando-container">Cargando...</div>;
 }
 
 export default App;
