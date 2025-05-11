@@ -1,7 +1,3 @@
-
-// El nuevo código completo de App.js es extenso, así que lo iré subiendo por bloques hasta completar todo
-// Bloque 1: Imports y configuración inicial
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
@@ -9,7 +5,6 @@ import "./App.css";
 function App() {
   const [pantalla, setPantalla] = useState("seleccion");
   const [modoSimulacroOficial, setModoSimulacroOficial] = useState(false);
-
   const [preguntas, setPreguntas] = useState([]);
   const [respuestas, setRespuestas] = useState({});
   const [preguntaActual, setPreguntaActual] = useState(0);
@@ -19,15 +14,10 @@ function App() {
   const [resultadosTemporales, setResultadosTemporales] = useState(null);
   const [datosUsuario, setDatosUsuario] = useState({ nombre: "", correo: "" });
 
-  const [comentarioResultado, setComentarioResultado] = useState("");
-
-  // Temporizador
   useEffect(() => {
     let intervalo;
     if (tiempoActivo && tiempo > 0) {
-      intervalo = setInterval(() => {
-        setTiempo((prev) => prev - 1);
-      }, 1000);
+      intervalo = setInterval(() => setTiempo((prev) => prev - 1), 1000);
     } else if (tiempo === 0 && tiempoActivo) {
       finalizarSimulacro();
     }
@@ -50,7 +40,7 @@ function App() {
     return datosUsuario.nombre.trim() !== "" && emailRegex.test(datosUsuario.correo);
   };
 
-  const iniciarPrueba = async (oficial = false) => {
+  const iniciarPrueba = (oficial = false) => {
     setModoSimulacroOficial(oficial);
     setPantalla("formulario_inicio");
   };
@@ -60,7 +50,6 @@ function App() {
       const endpoint = modoSimulacroOficial ? "simulacro-oficial" : "simulacro";
       const response = await axios.get(`https://backend-mvp-a6w0.onrender.com/${endpoint}`);
       const datos = modoSimulacroOficial ? response.data.slice(0, 30) : response.data.slice(0, 10);
-
       setPreguntas(datos);
       setTiempo(modoSimulacroOficial ? 6480 : 2400);
       setTiempoInicial(modoSimulacroOficial ? 6480 : 2400);
@@ -70,7 +59,7 @@ function App() {
       setPantalla("simulacro");
     } catch (err) {
       console.error("Error al cargar preguntas:", err);
-      alert("No se pudieron cargar las preguntas");
+      alert("No se pudieron cargar las preguntas.");
     }
   };
 
@@ -92,37 +81,25 @@ function App() {
 
   const calcularPuntaje = (curso) => {
     const puntajes = {
-      "RM": 0.63,
-      "RV": 0.63,
-      "Aritmética": 0.76,
-      "Álgebra": 0.76,
-      "Geometría": 0.76,
-      "Trigonometría": 0.76,
-      "Física": 0.81,
-      "Química": 0.46
+      "RM": 0.63, "RV": 0.63, "Aritmética": 0.76, "Álgebra": 0.76,
+      "Geometría": 0.76, "Trigonometría": 0.76, "Física": 0.81, "Química": 0.46
     };
     return puntajes[curso] || 0;
   };
 
   const finalizarSimulacro = () => {
     setTiempoActivo(false);
-    let correctas = 0;
-    let incorrectas = 0;
-    let sinResponder = 0;
-    let nota = 0;
+    let correctas = 0, incorrectas = 0, sinResponder = 0, nota = 0;
     const claves = {};
 
     preguntas.forEach(p => {
       const marcada = respuestas[p.ejercicio];
       claves[p.ejercicio] = marcada || null;
-      if (!marcada) {
-        sinResponder++;
-      } else if (marcada === p.respuesta_correcta) {
+      if (!marcada) sinResponder++;
+      else if (marcada === p.respuesta_correcta) {
         correctas++;
         nota += calcularPuntaje(p.curso);
-      } else {
-        incorrectas++;
-      }
+      } else incorrectas++;
     });
 
     const resultado = {
@@ -147,6 +124,9 @@ function App() {
       tiempo_usado: resultado.tiempoUsado,
       tipo: modoSimulacroOficial ? "simulacro" : "diagnostico",
       respuestas_usuario: claves
+    }).catch(err => {
+      console.error("Error al guardar resultado:", err);
+      alert("Error al guardar tu resultado.");
     });
   };
 
@@ -159,11 +139,19 @@ function App() {
   if (pantalla === "seleccion") {
     return (
       <div className="container inicio-container">
-        <h1>Bienvenido</h1>
-        <div className="inicio-content">
-          <p>Selecciona una opción:</p>
-          <button className="boton-iniciar" onClick={() => iniciarPrueba(false)}>Prueba Diagnóstica</button>
-          <button className="boton-iniciar" onClick={() => iniciarPrueba(true)}>Simulacro Oficial</button>
+        <h1>EDBOT</h1>
+        <h2>Preparación preuniversitaria impulsada por IA</h2>
+        <div className="zonas">
+          <div className="zona">
+            <h3>Prueba Diagnóstica</h3>
+            <p>Evalúa tus conocimientos iniciales y detecta tus fortalezas y debilidades.</p>
+            <button className="boton-iniciar" onClick={() => iniciarPrueba(false)}>Iniciar Diagnóstico</button>
+          </div>
+          <div className="zona">
+            <h3>Simulacro Oficial</h3>
+            <p>Simula un examen real con duración y preguntas de admisión. Ideal para medir tu progreso.</p>
+            <button className="boton-iniciar" onClick={() => iniciarPrueba(true)}>Iniciar Simulacro</button>
+          </div>
         </div>
       </div>
     );
@@ -196,7 +184,6 @@ function App() {
           </div>
           <div className="temporizador">⏱️ {formatoTiempo(tiempo)}</div>
         </div>
-
         <div className="pregunta-container">
           <div className="ejercicio-texto" dangerouslySetInnerHTML={{ __html: p.ejercicio }}></div>
           {p.imagen && <img src={p.imagen} alt="ejercicio" className="imagen-ejercicio" />}
@@ -212,7 +199,6 @@ function App() {
             ))}
           </ul>
         </div>
-
         <div className="controles-navegacion">
           <button className="boton-nav" onClick={anteriorPregunta} disabled={preguntaActual === 0}>Anterior</button>
           {preguntaActual === preguntas.length - 1 ? (
