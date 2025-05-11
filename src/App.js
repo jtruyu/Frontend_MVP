@@ -6,7 +6,6 @@ import "./App.css";
 function App() {
   const [pantalla, setPantalla] = useState("seleccion");
   const [modoSimulacroOficial, setModoSimulacroOficial] = useState(false);
-
   const [preguntas, setPreguntas] = useState([]);
   const [respuestas, setRespuestas] = useState({});
   const [preguntaActual, setPreguntaActual] = useState(0);
@@ -15,7 +14,6 @@ function App() {
   const [tiempoInicial, setTiempoInicial] = useState(0);
   const [resultadosTemporales, setResultadosTemporales] = useState(null);
   const [datosUsuario, setDatosUsuario] = useState({ nombre: "", correo: "" });
-  const [comentarioResultado, setComentarioResultado] = useState("");
 
   useEffect(() => {
     let intervalo;
@@ -43,17 +41,21 @@ function App() {
     try {
       const endpoint = modoSimulacroOficial ? "simulacro-oficial" : "simulacro";
       const response = await axios.get(`https://backend-mvp-a6w0.onrender.com/${endpoint}`);
-      const datos = modoSimulacroOficial ? response.data.slice(0, 30) : response.data.slice(0, 10);
+      const datos = Array.isArray(response.data) ? response.data : [];
+      const seleccionadas = modoSimulacroOficial ? datos.slice(0, 30) : datos.slice(0, 10);
 
-      setPreguntas(datos);
-      setTiempo(oficial => oficial ? 6480 : 2400);
-      setTiempoInicial(oficial => oficial ? 6480 : 2400);
+      if (seleccionadas.length === 0) throw new Error("No se recibieron preguntas");
+
+      setPreguntas(seleccionadas);
+      setTiempo(modoSimulacroOficial ? 6480 : 2400);
+      setTiempoInicial(modoSimulacroOficial ? 6480 : 2400);
       setRespuestas({});
       setPreguntaActual(0);
       setTiempoActivo(true);
       setPantalla("simulacro");
     } catch (err) {
-      alert("No se pudieron cargar las preguntas");
+      console.error("Error al cargar preguntas:", err);
+      alert("No se pudieron cargar las preguntas. Intenta más tarde.");
     }
   };
 
@@ -102,15 +104,15 @@ function App() {
     return (
       <div className="container inicio-container">
         <h1>EDBOT<br /><small>Preparación preuniversitaria impulsada por IA</small></h1>
-        <div className="inicio-content" style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
-          <div style={{ background: '#fff', padding: '20px', borderRadius: '10px', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
-            <h2>Prueba Diagnóstica</h2>
-            <p>Contiene 10 preguntas para evaluar tu nivel general. Tienes 40 minutos para completarla.</p>
+        <div className="inicio-content" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+          <div style={{ background: '#f0f0f0', padding: '20px', borderRadius: '10px', flex: '1 1 45%' }}>
+            <h2>Test Diagnóstico</h2>
+            <p>Evaluación breve de 10 preguntas para conocer tu nivel base. Tiempo: 40 minutos.</p>
             <button className="boton-iniciar" onClick={() => iniciarPrueba(false)}>Iniciar Diagnóstico</button>
           </div>
-          <div style={{ background: '#fff', padding: '20px', borderRadius: '10px', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
+          <div style={{ background: '#f0f0f0', padding: '20px', borderRadius: '10px', flex: '1 1 45%' }}>
             <h2>Simulacro Oficial</h2>
-            <p>Simulacro con 30 preguntas en 1h 48min. Los resultados se entregarán oficialmente.</p>
+            <p>Simulación completa con 30 preguntas. Tiempo: 1 hora 48 minutos. Resultados entregados oficialmente.</p>
             <button className="boton-iniciar" onClick={() => iniciarPrueba(true)}>Iniciar Simulacro</button>
           </div>
         </div>
@@ -118,7 +120,7 @@ function App() {
     );
   }
 
-  // ... las demás pantallas permanecen igual
+  // ... el resto del flujo (registro, simulacro, resultados, gracias) permanece sin cambios
 }
 
 export default App;
