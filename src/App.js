@@ -33,7 +33,7 @@ function App() {
         setTiempo((tiempoAnterior) => tiempoAnterior - 1);
       }, 1000);
     } else if (tiempo === 0) {
-      finalizarSimulacro();
+      finalizarDiagnostico();
     }
 
     return () => clearInterval(intervalo);
@@ -88,17 +88,17 @@ function App() {
     
   // Función para iniciar el simulacro directamente desde la pantalla de inicio
   // Modifica la función iniciarSimulacro() para ordenar las preguntas después de recibirlas
-  const iniciarSimulacro = async () => {
+  const iniciarDiagnostico = async () => {
     setCargando(true);
     setRespuestas({});
     setResultados({});
     setPreguntaActual(0);
     setTiempo(40 * 60); // Reiniciar el tiempo a 40 minutos
     setTiempoActivo(true);
-    setPantalla("simulacro");
+    setPantalla("diagnostico");
     
     try {
-      const response = await axios.get("https://backend-mvp-a6w0.onrender.com/simulacro", {
+      const response = await axios.get("https://backend-mvp-a6w0.onrender.com/diagnostico", {
         params: { 
           num_preguntas: 10 // Solicitamos 10 preguntas
         }
@@ -175,7 +175,7 @@ function App() {
     }
   };
 
-  const finalizarSimulacro = () => {
+  const finalizarDiagnostico = () => {
     setTiempoActivo(false);
     
     // Calcular resultados
@@ -273,7 +273,7 @@ function App() {
           <p>Esta prueba de diagnóstico contiene 10 ejercicios seleccionados de exámenes de admisión a la Universidad Nacional de Ingeniería (UNI), que te permitirán evaluar tu nivel de preparación.</p>
           <p>Dispondrás de 40 minutos para resolverlos.</p>
           <p>¡Mucho éxito!</p>
-          <button className="boton-iniciar" onClick={iniciarSimulacro}>
+          <button className="boton-iniciar" onClick={iniciarDiagnostico}>
             Comenzar
           </button>
         </div>
@@ -285,7 +285,7 @@ function App() {
   if (pantalla === "formulario") {
     return (
       <div className="container formulario-container">
-        <h1>¡Simulacro completado!</h1>
+        <h1>¡Prueba diagnóstica completada!</h1>
         <div className="formulario-content">
           <p>Por favor, completa tus datos para ver tus resultados:</p>
           
@@ -336,12 +336,12 @@ function App() {
   }
   
   // Pantalla de simulacro
-  if (pantalla === "simulacro" && preguntas.length > 0) {
+  if (pantalla === "diagnostico" && preguntas.length > 0) {
     const pregunta = preguntas[preguntaActual];
     
     return (
-      <div className="container simulacro-container">
-        <div className="encabezado-simulacro">
+      <div className="container diagnostico-container">
+        <div className="encabezado-diagnostico">
           <div className="progreso">
             <div className="texto-progreso">Pregunta: {preguntaActual + 1} de {preguntas.length}</div>
             <div className="barra-progreso">
@@ -392,8 +392,8 @@ function App() {
           </button>
           
           {preguntaActual === preguntas.length - 1 ? (
-            <button className="boton-finalizar" onClick={finalizarSimulacro}>
-              Finalizar simulacro
+            <button className="boton-finalizar" onClick={finalizarDiagnostico}>
+              Finalizar diagnostico
             </button>
           ) : (
             <button 
@@ -412,7 +412,7 @@ function App() {
   if (pantalla === "resultados") {
     return (
       <div className="container resultados-container">
-        <h1>Resultados del Simulacro</h1>
+        <h1>Resultados de la prueba diagnóstica</h1>
         
         <div className="datos-usuario">
           <p><strong>Nombre:</strong> {datosUsuario.nombre}</p>
@@ -491,7 +491,7 @@ function App() {
   return (
     <div className="container cargando-container">
       <div className="spinner"></div>
-      <p>Cargando simulacro...</p>
+      <p>Cargando diagnóstico...</p>
     </div>
   );
 }
