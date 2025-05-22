@@ -663,7 +663,7 @@ body {
 .tema-card h3 {
   color: #2c3e50;
   font-size: 1.1rem; /* Fuente más pequeña */
-  margin-bottom: 5px;
+  margin-bottom: 0; /* Eliminar margen inferior para la descripción */
 }
 
 .tema-card p {
