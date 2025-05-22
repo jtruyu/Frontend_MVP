@@ -59,7 +59,7 @@ function App() {
       window.MathJax.typesetPromise()
         .then(() => {
           console.log("MathJax renderizado en banco de preguntas");
-          // *** NUEVO: Resetear explícitamente el feedback para la pregunta actual cuando se carga ***
+          // Resetear explícitamente el feedback para la pregunta actual cuando se carga
           const currentQuestion = preguntasBanco[preguntaActualBanco];
           if (currentQuestion && feedbackBanco[currentQuestion.ejercicio] !== null) {
             setFeedbackBanco(prevFeedback => ({
@@ -347,24 +347,15 @@ function App() {
 
   // Función para seleccionar respuesta en el Banco de Preguntas
   const seleccionarRespuestaBanco = (ejercicio, letra) => {
-    console.log(`Intentando seleccionar: ${letra} para ejercicio: ${ejercicio}`); // Depuración
-    setRespuestasBanco((prevRespuestas) => {
-      const newResponses = {
-        ...prevRespuestas,
-        [ejercicio]: letra,
-      };
-      console.log("Nuevo estado de respuestas después de la selección:", newResponses); // Depuración
-      return newResponses;
-    });
+    setRespuestasBanco((prevRespuestas) => ({
+      ...prevRespuestas,
+      [ejercicio]: letra,
+    }));
     // Al seleccionar una nueva respuesta, se limpia el feedback para esa pregunta
-    setFeedbackBanco((prevFeedback) => {
-      const newFeedback = {
-        ...prevFeedback,
-        [ejercicio]: null
-      };
-      console.log("Nuevo estado de feedback después de la selección (limpiado):", newFeedback); // Depuración
-      return newFeedback;
-    });
+    setFeedbackBanco((prevFeedback) => ({
+      ...prevFeedback,
+      [ejercicio]: null
+    }));
   };
 
   // Función para verificar la respuesta en el Banco de Preguntas
@@ -395,15 +386,7 @@ function App() {
     const nextIndex = preguntaActualBanco + 1;
     if (nextIndex < preguntasBanco.length) {
       setPreguntaActualBanco(nextIndex);
-      // Limpiar el feedback para la nueva pregunta que se va a mostrar
-      const nextQuestion = preguntasBanco[nextIndex];
-      if (nextQuestion) {
-        setFeedbackBanco(prevFeedback => ({
-          ...prevFeedback,
-          [nextQuestion.ejercicio]: null
-        }));
-        console.log(`Feedback para la siguiente pregunta (${nextQuestion.ejercicio}) limpiado.`); // Depuración
-      }
+      // El feedback para la nueva pregunta se limpiará en el useEffect de MathJax
     } else {
       // Si se terminaron las preguntas de la ronda actual, iniciar una nueva ronda
       alert("Has completado todos los ejercicios de esta selección. ¡Iniciando una nueva ronda!");
@@ -419,15 +402,7 @@ function App() {
     if (preguntaActualBanco > 0) {
       const prevIndex = preguntaActualBanco - 1;
       setPreguntaActualBanco(prevIndex);
-      // Limpiar el feedback para la nueva pregunta que se va a mostrar
-      const prevQuestion = preguntasBanco[prevIndex];
-      if (prevQuestion) {
-        setFeedbackBanco(prevFeedback => ({
-          ...prevFeedback,
-          [prevQuestion.ejercicio]: null
-        }));
-        console.log(`Feedback para la pregunta anterior (${prevQuestion.ejercicio}) limpiado.`); // Depuración
-      }
+      // El feedback para la nueva pregunta se limpiará en el useEffect de MathJax
     }
   };
 
@@ -543,7 +518,7 @@ function App() {
                     checked={respuestas[pregunta.ejercicio] === alt.letra}
                     onChange={() => seleccionarRespuesta(pregunta.ejercicio, alt.letra)}
                   />
-                  <span className="texto-opcion">{alt.letra}: </span>
+                  <span className="texto-opcion">{alt.letra}) </span> {/* Cambiado de : a ) */}
                   <span className="texto-opcion" dangerouslySetInnerHTML={{ __html: alt.texto }}></span>
                 </label>
               </li>
@@ -778,7 +753,7 @@ function App() {
                     onChange={() => seleccionarRespuestaBanco(pregunta.ejercicio, alt.letra)}
                     disabled={feedback !== null} // Deshabilitar si ya hay feedback
                   />
-                  <span className="texto-opcion">{alt.letra}: </span>
+                  <span className="texto-opcion">{alt.letra}) </span> {/* Cambiado de : a ) */}
                   <span className="texto-opcion" dangerouslySetInnerHTML={{ __html: alt.texto }}></span>
                 </label>
               </li>
