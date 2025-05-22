@@ -57,10 +57,21 @@ function App() {
   useEffect(() => {
     if (window.MathJax && preguntasBanco.length > 0 && pantalla === "bancoPreguntasSimulacro") {
       window.MathJax.typesetPromise()
-        .then(() => console.log("MathJax renderizado en banco de preguntas"))
+        .then(() => {
+          console.log("MathJax renderizado en banco de preguntas");
+          // *** NUEVO: Resetear explícitamente el feedback para la pregunta actual cuando se carga ***
+          const currentQuestion = preguntasBanco[preguntaActualBanco];
+          if (currentQuestion && feedbackBanco[currentQuestion.ejercicio] !== null) {
+            setFeedbackBanco(prevFeedback => ({
+              ...prevFeedback,
+              [currentQuestion.ejercicio]: null
+            }));
+            console.log(`Feedback para ${currentQuestion.ejercicio} reseteado en carga.`);
+          }
+        })
         .catch((err) => console.error("MathJax error en banco de preguntas:", err));
     }
-  }, [preguntaActualBanco, preguntasBanco, pantalla]);
+  }, [preguntaActualBanco, preguntasBanco, pantalla]); // Dependencias son correctas
 
   // Efecto para renderizar MathJax en la pantalla de resultados del Diagnóstico
   useEffect(() => {
@@ -336,15 +347,24 @@ function App() {
 
   // Función para seleccionar respuesta en el Banco de Preguntas
   const seleccionarRespuestaBanco = (ejercicio, letra) => {
-    setRespuestasBanco((prevRespuestas) => ({
-      ...prevRespuestas,
-      [ejercicio]: letra,
-    }));
+    console.log(`Intentando seleccionar: ${letra} para ejercicio: ${ejercicio}`); // Depuración
+    setRespuestasBanco((prevRespuestas) => {
+      const newResponses = {
+        ...prevRespuestas,
+        [ejercicio]: letra,
+      };
+      console.log("Nuevo estado de respuestas después de la selección:", newResponses); // Depuración
+      return newResponses;
+    });
     // Al seleccionar una nueva respuesta, se limpia el feedback para esa pregunta
-    setFeedbackBanco((prevFeedback) => ({
-      ...prevFeedback,
-      [ejercicio]: null
-    }));
+    setFeedbackBanco((prevFeedback) => {
+      const newFeedback = {
+        ...prevFeedback,
+        [ejercicio]: null
+      };
+      console.log("Nuevo estado de feedback después de la selección (limpiado):", newFeedback); // Depuración
+      return newFeedback;
+    });
   };
 
   // Función para verificar la respuesta en el Banco de Preguntas
@@ -376,10 +396,14 @@ function App() {
     if (nextIndex < preguntasBanco.length) {
       setPreguntaActualBanco(nextIndex);
       // Limpiar el feedback para la nueva pregunta que se va a mostrar
-      setFeedbackBanco(prevFeedback => ({
-        ...prevFeedback,
-        [preguntasBanco[nextIndex].ejercicio]: null
-      }));
+      const nextQuestion = preguntasBanco[nextIndex];
+      if (nextQuestion) {
+        setFeedbackBanco(prevFeedback => ({
+          ...prevFeedback,
+          [nextQuestion.ejercicio]: null
+        }));
+        console.log(`Feedback para la siguiente pregunta (${nextQuestion.ejercicio}) limpiado.`); // Depuración
+      }
     } else {
       // Si se terminaron las preguntas de la ronda actual, iniciar una nueva ronda
       alert("Has completado todos los ejercicios de esta selección. ¡Iniciando una nueva ronda!");
@@ -396,10 +420,14 @@ function App() {
       const prevIndex = preguntaActualBanco - 1;
       setPreguntaActualBanco(prevIndex);
       // Limpiar el feedback para la nueva pregunta que se va a mostrar
-      setFeedbackBanco(prevFeedback => ({
-        ...prevFeedback,
-        [preguntasBanco[prevIndex].ejercicio]: null
-      }));
+      const prevQuestion = preguntasBanco[prevIndex];
+      if (prevQuestion) {
+        setFeedbackBanco(prevFeedback => ({
+          ...prevFeedback,
+          [prevQuestion.ejercicio]: null
+        }));
+        console.log(`Feedback para la pregunta anterior (${prevQuestion.ejercicio}) limpiado.`); // Depuración
+      }
     }
   };
 
