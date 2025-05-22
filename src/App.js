@@ -4,12 +4,12 @@ import axios from "axios";
 import "./App.css";
 
 function App() {
+  const [pantalla, setPantalla] = useState("inicio");
   const [preguntas, setPreguntas] = useState([]);
   const [respuestas, setRespuestas] = useState({});
   const [resultados, setResultados] = useState({});
   const [preguntaActual, setPreguntaActual] = useState(0);
   const [cargando, setCargando] = useState(false);
-  const [pantalla, setPantalla] = useState("inicio");
   const [tiempo, setTiempo] = useState(40 * 60);
   const [tiempoInicial] = useState(40 * 60);
   const [tiempoActivo, setTiempoActivo] = useState(false);
@@ -17,22 +17,41 @@ function App() {
   const [comentarioResultado, setComentarioResultado] = useState("");
   const [resultadosTemporales, setResultadosTemporales] = useState(null);
 
-  const [pantallaBanco, setPantallaBanco] = useState(false);
+  // Banco de preguntas
   const [temasFisica, setTemasFisica] = useState([]);
   const [temasSeleccionados, setTemasSeleccionados] = useState([]);
   const [preguntasBanco, setPreguntasBanco] = useState([]);
   const [respuestasBanco, setRespuestasBanco] = useState({});
   const [preguntaActualBanco, setPreguntaActualBanco] = useState(0);
 
+  useEffect(() => {
+    let intervalo;
+    if (tiempoActivo && tiempo > 0) {
+      intervalo = setInterval(() => {
+        setTiempo((prev) => prev - 1);
+      }, 1000);
+    } else if (tiempo === 0) {
+      finalizarDiagnostico();
+    }
+    return () => clearInterval(intervalo);
+  }, [tiempoActivo, tiempo]);
+
+  useEffect(() => {
+    if (window.MathJax && preguntas.length > 0) {
+      window.MathJax.typesetPromise().catch((err) => console.error("MathJax error:", err));
+    }
+  }, [preguntaActual, preguntas]);
+
+  useEffect(() => {
+    if (pantalla === "resultados" && window.MathJax) {
+      window.MathJax.typesetPromise().catch((err) => console.error("MathJax error en resultados:", err));
+    }
+  }, [pantalla]);
+
   const obtenerOrdenCurso = (curso) => {
     const ordenCursos = {
-      "RM": 1,
-      "Aritmética": 2,
-      "Álgebra": 3,
-      "Geometría": 4,
-      "Trigonometría": 5,
-      "Física": 6,
-      "Química": 7
+      "RM": 1, "Aritmética": 2, "Álgebra": 3, "Geometría": 4, "Trigonometría": 5,
+      "Física": 6, "Química": 7
     };
     return ordenCursos[curso] || 999;
   };
@@ -45,7 +64,6 @@ function App() {
     setTiempo(40 * 60);
     setTiempoActivo(true);
     setPantalla("diagnostico");
-
     try {
       const response = await axios.get("https://backend-mvp-a6w0.onrender.com/diagnostico", {
         params: { num_preguntas: 10 }
@@ -54,12 +72,12 @@ function App() {
         const preguntasOrdenadas = [...response.data].sort((a, b) => obtenerOrdenCurso(a.curso) - obtenerOrdenCurso(b.curso));
         setPreguntas(preguntasOrdenadas);
       } else {
-        alert("No se pudieron cargar suficientes preguntas. Intenta nuevamente.");
+        alert("No se pudieron cargar suficientes preguntas.");
         setPantalla("inicio");
       }
     } catch (error) {
       console.error("Error al obtener preguntas:", error);
-      alert("Error al cargar las preguntas. Por favor, intenta de nuevo.");
+      alert("Error al cargar preguntas.");
       setPantalla("inicio");
     } finally {
       setCargando(false);
@@ -71,7 +89,7 @@ function App() {
       const response = await axios.get("https://backend-mvp-a6w0.onrender.com/temas-fisica");
       setTemasFisica(response.data);
     } catch (error) {
-      console.error("Error al cargar temas de física:", error);
+      console.error("Error al cargar temas:", error);
     }
   };
 
@@ -92,10 +110,7 @@ function App() {
     setRespuestasBanco((prev) => ({ ...prev, [id]: letra }));
   };
 
-  const verificarRespuesta = (pregunta) => {
-    const r = respuestasBanco[pregunta.ejercicio];
-    return r === pregunta.alt_correcta;
-  };
+  const verificarRespuesta = (pregunta) => respuestasBanco[pregunta.ejercicio] === pregunta.alt_correcta;
 
   const siguienteBanco = () => {
     if (preguntaActualBanco < preguntasBanco.length - 1) {
@@ -107,9 +122,15 @@ function App() {
     }
   };
 
-  // Resto de pantallas de diagnóstico (sin modificar)
-  // ...
+  const formatoTiempo = (segundos) => {
+    const minutos = Math.floor(segundos / 60);
+    const segundosRestantes = segundos % 60;
+    return `${minutos.toString().padStart(2, '0')}:${segundosRestantes.toString().padStart(2, '0')}`;
+  };
 
+  // ... (toda la lógica de diagnóstico sigue intacta aquí)
+
+  // Pantalla de inicio con ambas funcionalidades
   if (pantalla === "inicio") {
     return (
       <div className="container inicio-container">
@@ -136,17 +157,18 @@ function App() {
       <div className="container">
         <h1>Selecciona los temas</h1>
         <p>Puedes elegir uno o varios temas.</p>
-        {temasFisica.map((tema, i) => (
-          <label key={i}>
-            <input type="checkbox" checked={temasSeleccionados.includes(tema)} onChange={() => {
-              setTemasSeleccionados((prev) => prev.includes(tema) ? prev.filter(t => t !== tema) : [...prev, tema]);
-            }} /> {tema}
-          </label>
-        ))}
-        <br />
+        <div style={{ margin: "20px 0" }}>
+          {temasFisica.map((tema, i) => (
+            <label key={i} style={{ display: "block", marginBottom: "10px" }}>
+              <input type="checkbox" checked={temasSeleccionados.includes(tema)} onChange={() => {
+                setTemasSeleccionados((prev) => prev.includes(tema) ? prev.filter(t => t !== tema) : [...prev, tema]);
+              }} /> {tema}
+            </label>
+          ))}
+        </div>
         <button className="boton-iniciar" disabled={temasSeleccionados.length === 0} onClick={iniciarBancoPreguntas}>Empezar</button>
         <br />
-        <button className="boton-nav" onClick={() => setPantalla("inicio")}>Volver a inicio</button>
+        <button className="boton-nav" onClick={() => setPantalla("inicio")} style={{ marginTop: 10 }}>Volver a inicio</button>
       </div>
     );
   }
@@ -155,6 +177,7 @@ function App() {
     const pregunta = preguntasBanco[preguntaActualBanco];
     const marcada = respuestasBanco[pregunta.ejercicio];
     const correcta = verificarRespuesta(pregunta);
+
     return (
       <div className="container">
         <h2 className="ejercicio-texto">
