@@ -518,8 +518,7 @@ function App() {
                     checked={respuestas[pregunta.ejercicio] === alt.letra}
                     onChange={() => seleccionarRespuesta(pregunta.ejercicio, alt.letra)}
                   />
-                  <span className="texto-opcion">{alt.letra}) </span> {/* Cambiado de : a ) */}
-                  <span className="texto-opcion" dangerouslySetInnerHTML={{ __html: alt.texto }}></span>
+                  <span className="texto-opcion" dangerouslySetInnerHTML={{ __html: `${alt.letra}) ${alt.texto}` }}></span> {/* Combinado y cambiado a ')' */}
                 </label>
               </li>
             ))}
@@ -753,8 +752,7 @@ function App() {
                     onChange={() => seleccionarRespuestaBanco(pregunta.ejercicio, alt.letra)}
                     disabled={feedback !== null} // Deshabilitar si ya hay feedback
                   />
-                  <span className="texto-opcion">{alt.letra}) </span> {/* Cambiado de : a ) */}
-                  <span className="texto-opcion" dangerouslySetInnerHTML={{ __html: alt.texto }}></span>
+                  <span className="texto-opcion" dangerouslySetInnerHTML={{ __html: `${alt.letra}) ${alt.texto}` }}></span> {/* Combinado y cambiado a ')' */}
                 </label>
               </li>
             ))}
