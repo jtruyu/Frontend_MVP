@@ -632,17 +632,17 @@ body {
 
 .temas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin-top: 30px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Más pequeño */
+  gap: 10px; /* Menor espacio */
+  margin-top: 20px; /* Menor margen */
+  margin-bottom: 20px; /* Menor margen */
   width: 100%;
   max-width: 800px;
 }
 
 .tema-card {
   background-color: white;
-  padding: 20px;
+  padding: 15px; /* Menor padding */
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
@@ -662,12 +662,12 @@ body {
 
 .tema-card h3 {
   color: #2c3e50;
-  font-size: 1.2rem;
+  font-size: 1.1rem; /* Fuente más pequeña */
   margin-bottom: 5px;
 }
 
 .tema-card p {
-  font-size: 0.9rem;
+  font-size: 0.85rem; /* Fuente más pequeña */
   color: #7f8c8d;
 }
 
