@@ -26,7 +26,6 @@ function App() {
   const [respuestasBanco, setRespuestasBanco] = useState({}); // Respuestas del usuario en el banco
   const [feedbackBanco, setFeedbackBanco] = useState({}); // Retroalimentación para la pregunta actual del banco
   const [preguntasBancoOriginales, setPreguntasBancoOriginales] = useState([]); // Todas las preguntas obtenidas para los temas
-  // const [preguntasBancoMostradasIndices, setPreguntasBancoMostradasIndices] = useState([]); // Ya no es necesario con el enfoque de mezclar el array completo
 
   // Estado global para controlar la pantalla actual
   const [pantalla, setPantalla] = useState("mainInicio"); // "mainInicio", "diagnostico", "formulario", "resultados", "bancoPreguntasTemas", "bancoPreguntasSimulacro"
@@ -263,7 +262,6 @@ function App() {
     setRespuestasBanco({}); // Resetear respuestas del banco
     setFeedbackBanco({}); // Resetear feedback del banco
     setPreguntasBancoOriginales([]); // Resetear preguntas originales
-    // setPreguntasBancoMostradasIndices([]); // Ya no es necesario
 
     try {
       const response = await axios.get("https://backend-mvp-a6w0.onrender.com/banco-preguntas/fisica/temas");
@@ -312,7 +310,6 @@ function App() {
     setRespuestasBanco({});
     setFeedbackBanco({});
     setPreguntaActualBanco(0);
-    // setPreguntasBancoMostradasIndices(new Set()); // Ya no es necesario
 
     try {
       const response = await axios.get("https://backend-mvp-a6w0.onrender.com/banco-preguntas", {
@@ -339,23 +336,15 @@ function App() {
 
   // Función para seleccionar respuesta en el Banco de Preguntas
   const seleccionarRespuestaBanco = (ejercicio, letra) => {
-    // console.log(`Attempting to select: ${letra} for exercise: ${ejercicio}`); // Debugging
-    setRespuestasBanco((prevRespuestas) => {
-      const newResponses = {
-        ...prevRespuestas,
-        [ejercicio]: letra,
-      };
-      // console.log("New responses state:", newResponses); // Debugging
-      return newResponses;
-    });
-    setFeedbackBanco((prevFeedback) => {
-      const newFeedback = {
-        ...prevFeedback,
-        [ejercicio]: null // Reset feedback when answer changes
-      };
-      // console.log("New feedback state after selection attempt:", newFeedback); // Debugging
-      return newFeedback;
-    });
+    setRespuestasBanco((prevRespuestas) => ({
+      ...prevRespuestas,
+      [ejercicio]: letra,
+    }));
+    // Al seleccionar una nueva respuesta, se limpia el feedback para esa pregunta
+    setFeedbackBanco((prevFeedback) => ({
+      ...prevFeedback,
+      [ejercicio]: null
+    }));
   };
 
   // Función para verificar la respuesta en el Banco de Preguntas
@@ -386,8 +375,11 @@ function App() {
     const nextIndex = preguntaActualBanco + 1;
     if (nextIndex < preguntasBanco.length) {
       setPreguntaActualBanco(nextIndex);
-      // No es necesario limpiar el feedback aquí, ya que se limpia al seleccionar una respuesta
-      // o cuando se carga una nueva pregunta en el render.
+      // Limpiar el feedback para la nueva pregunta que se va a mostrar
+      setFeedbackBanco(prevFeedback => ({
+        ...prevFeedback,
+        [preguntasBanco[nextIndex].ejercicio]: null
+      }));
     } else {
       // Si se terminaron las preguntas de la ronda actual, iniciar una nueva ronda
       alert("Has completado todos los ejercicios de esta selección. ¡Iniciando una nueva ronda!");
@@ -401,9 +393,13 @@ function App() {
   // Función para retroceder a la pregunta anterior en el Banco de Preguntas
   const preguntaAnteriorBanco = () => {
     if (preguntaActualBanco > 0) {
-      setPreguntaActualBanco(preguntaActualBanco - 1);
-      // No es necesario limpiar el feedback aquí, ya que se limpia al seleccionar una respuesta
-      // o cuando se carga una nueva pregunta en el render.
+      const prevIndex = preguntaActualBanco - 1;
+      setPreguntaActualBanco(prevIndex);
+      // Limpiar el feedback para la nueva pregunta que se va a mostrar
+      setFeedbackBanco(prevFeedback => ({
+        ...prevFeedback,
+        [preguntasBanco[prevIndex].ejercicio]: null
+      }));
     }
   };
 
@@ -704,7 +700,7 @@ function App() {
               onClick={() => handleTemaSeleccionado(tema)}
             >
               <h3>{tema}</h3>
-              <p>Ejercicios de {tema}</p>
+              {/* <p>Ejercicios de {tema}</p> <-- Se ha eliminado la descripción */}
             </div>
           ))}
         </div>
