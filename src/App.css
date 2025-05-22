@@ -21,7 +21,60 @@ body {
   flex-direction: column;
 }
 
-/* Pantalla de inicio */
+/* --- ESTILOS ACTUALIZADOS/NUEVOS PARA PANTALLA DE INICIO --- */
+.inicio-container-main { /* Nuevo contenedor para la página de inicio con dos opciones */
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.inicio-container-main h1 {
+  margin-bottom: 10px; /* Reducido */
+ color: #2c3e50;
+  font-size: 3rem; /* Aumentado para el título principal */
+}
+
+.inicio-subtitulo {
+  font-size: 1.3rem;
+  color: #555;
+  margin-bottom: 40px;
+}
+
+.inicio-opciones-container {
+  display: flex;
+  justify-content: space-around; /* O space-between */
+  align-items: stretch; /* Para que las cajas tengan la misma altura si el contenido varía */
+  flex-wrap: wrap; /* Para responsiveness si no caben */
+  gap: 30px; /* Espacio entre los recuadros */
+  width: 100%;
+}
+
+.inicio-opcion-recuadro {
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+ box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px; /* Ajustar según preferencia */
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Para que el botón quede abajo */
+}
+
+.inicio-opcion-recuadro h2 {
+  color: #3498db; /* Color distintivo para los títulos de los recuadros */
+  margin-bottom: 15px;
+  font-size: 1.8rem;
+}
+
+.inicio-opcion-recuadro p {
+  margin-bottom: 15px;
+  font-size: 1rem; /* Ajustado */
+ flex-grow: 1; /* Para que el texto ocupe el espacio disponible */
+}
+
+/* Pantalla de inicio original (si aún se usa o como referencia) */
 .inicio-container {
   justify-content: center;
   align-items: center;
@@ -30,15 +83,15 @@ body {
 
 .inicio-container h1 {
   margin-bottom: 30px;
-  color: #2c3e50;
+ color: #2c3e50;
   font-size: 2.5rem;
 }
 
-.inicio-content {
+.inicio-content { /* Estilo del contenido interno del recuadro de diagnóstico original */
   background-color: white;
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+ box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 600px;
 }
@@ -56,8 +109,10 @@ body {
   border-radius: 6px;
   font-size: 1.1rem;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
-  margin-top: 20px;
+ transition: background-color 0.3s, transform 0.2s;
+  margin-top: 20px; /* Asegura espacio arriba del botón */
+  align-self: center; /* Centra el botón si el recuadro es flex */
+  width: auto; /* O width: 100% si se quiere que ocupe todo el ancho del recuadro */
 }
 
 .boton-iniciar:hover {
@@ -67,9 +122,102 @@ body {
 
 .boton-iniciar:disabled {
   background-color: #95a5a6;
-  cursor: not-allowed;
+ cursor: not-allowed;
   transform: none;
 }
+
+
+/* --- ESTILOS PARA BANCO DE PREGUNTAS - SELECCIÓN DE TEMA --- */
+.seleccion-tema-container {
+  text-align: center;
+}
+
+.seleccion-tema-container h1 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+  font-size: 2.2rem;
+}
+.seleccion-tema-container h2 {
+  margin-bottom: 25px;
+  color: #34495e;
+  font-size: 1.3rem;
+}
+
+.temas-lista {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Alinea los checkboxes a la izquierda */
+  max-width: 500px;
+  margin: 0 auto 30px auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+ box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.tema-item {
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.tema-item label {
+  font-size: 1.1rem;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.tema-item input[type="checkbox"] {
+  transform: scale(1.2); /* Hace el checkbox un poco más grande */
+  margin-right: 5px;
+}
+
+/* --- ESTILOS PARA BANCO DE PREGUNTAS - MOSTRAR EJERCICIO --- */
+/* Reutilizar .diagnostico-container, .pregunta-container, .opciones-lista, .opcion etc. */
+/* Ocultar barra de progreso y temporizador si no se usan */
+.encabezado-simulacro.sin-progreso-timer .progreso,
+.encabezado-simulacro.sin-progreso-timer .temporizador {
+  display: none;
+}
+.encabezado-simulacro.sin-progreso-timer {
+  justify-content: center; /* O como se prefiera alinear el título */
+  text-align: center;
+  margin-bottom: 20px;
+}
+.encabezado-simulacro.sin-progreso-timer h2{
+    font-size: 1.5rem;
+    color: #2c3e50;
+}
+.encabezado-simulacro.sin-progreso-timer p{
+    font-size: 0.9rem;
+    color: #555;
+}
+
+
+.opcion.opcion-seleccionada {
+  background-color: #eaf2f8; /* Un color suave para indicar selección antes de verificar */
+  border-color: #3498db;
+}
+
+.verificacion-feedback {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.verificacion-feedback.correcta {
+  background-color: #d5f5e3; /* Verde suave */
+  color: #27ae60; /* Verde oscuro */
+  border: 1px solid #27ae60;
+}
+
+.verificacion-feedback.incorrecta {
+  background-color: #fadbd8; /* Rojo suave */
+  color: #e74c3c; /* Rojo oscuro */
+  border: 1px solid #e74c3c;
+}
+
 
 /* Pantalla de formulario (al final del test) */
 .formulario-container {
@@ -87,7 +235,7 @@ body {
   background-color: white;
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+ box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
@@ -117,7 +265,7 @@ body {
 .campo-formulario input {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
+ border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
   transition: border 0.3s;
@@ -138,7 +286,7 @@ body {
 .boton-ver-resultados {
   background-color: #3498db;
   color: white;
-  border: none;
+ border: none;
   padding: 12px 30px;
   border-radius: 6px;
   font-size: 1.1rem;
@@ -159,12 +307,16 @@ body {
   transform: none;
 }
 
-/* Pantalla de simulacro */
-.simulacro-container {
+/* Pantalla de simulacro (Diagnóstico) */
+.simulacro-container { /* Renombrado en JS a diagnostico-container */
   gap: 20px;
 }
+.diagnostico-container { /* Estilo general para ambas vistas de preguntas */
+    gap: 20px;
+}
 
-.encabezado-simulacro {
+
+.encabezado-simulacro { /* Usado también por banco de preguntas, adaptado con .sin-progreso-timer */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -193,7 +345,7 @@ body {
   height: 100%;
   background-color: #3498db;
   border-radius: 4px;
-  transition: width 0.5s ease;
+ transition: width 0.5s ease;
 }
 
 .temporizador {
@@ -202,21 +354,21 @@ body {
   border-radius: 6px;
   font-weight: bold;
   color: #e74c3c;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .pregunta-container {
   background-color: white;
   padding: 25px;
   border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+ box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 }
 
-.ejercicio-texto {
+.ejercicio-texto { /* Aplicable a ambos tipos de prueba */
   margin-bottom: 20px;
   color: #2c3e50;
-  font-size: 1.3rem;
+  font-size: 1.3rem; /* Unificado */
 }
 
 .imagen-ejercicio {
@@ -237,7 +389,7 @@ body {
   padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ddd;
-  border-radius: 6px;
+ border-radius: 6px;
   transition: all 0.3s;
   min-width: 200px;
   width: 100%;
@@ -250,52 +402,49 @@ body {
 
 .opcion label {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-start; /* Cambiado para mejor alineación con texto multilínea */
   cursor: pointer;
   width: 100%;
 }
 
 .opcion input[type="radio"] {
   margin-right: 12px;
-  margin-top: 3px;
-  flex-shrink: 0;
+  margin-top: 5px; /* Ajustar para alineación vertical con el texto */
+ flex-shrink: 0;
 }
 
-.texto-opcion-container {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  text-align: left;
-  margin-left: 20px;
-  width: 100%;
-  justify-content: flex-start;
-}
+/* .texto-opcion-container ya no es necesario si se simplifica la estructura */
+/* .letra-opcion y .texto-opcion pueden combinarse o ajustarse */
 
-.letra-opcion {
-  margin-right: 5px;
-  font-weight: bold;
-  flex-shrink: 0;
-}
-
-.texto-opcion {
+.texto-opcion { /* Estilo para el texto completo de la opción, incluyendo la letra A:, B: */
   flex: 1;
-  display: inline-block;
+  display: inline-block; /* O block si se prefiere */
   padding-right: 10px;
-  font-size: 1.3rem;
+  font-size: 1.1rem; /* Ajustado para consistencia */
+ line-height: 1.5;
 }
+
 
 .controles-navegacion {
   display: flex;
   justify-content: space-between;
+  align-items: center; /* Para alinear verticalmente si hay botones de diferentes alturas */
   margin-top: 20px;
+  flex-wrap: wrap; /* Para que los botones se ajusten en pantallas pequeñas */
+  gap: 10px; /* Espacio entre grupos de botones o botones individuales */
 }
+.controles-navegacion > div { /* Si agrupas botones (izquierda/derecha) */
+    display: flex;
+    gap: 10px;
+}
+
 
 .boton-nav,
 .boton-finalizar {
   padding: 10px 20px;
   border-radius: 6px;
   font-size: 1rem;
-  cursor: pointer;
+ cursor: pointer;
   transition: all 0.3s;
 }
 
@@ -314,10 +463,10 @@ body {
   cursor: not-allowed;
 }
 
-.boton-finalizar {
+.boton-finalizar { /* Usado para "Siguiente Pregunta" en banco, y "Finalizar" en diagnóstico */
   background-color: #27ae60;
   color: white;
-  border: none;
+ border: none;
 }
 
 .boton-finalizar:hover {
@@ -328,7 +477,7 @@ body {
 .resultados-container {
   background-color: white;
   border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+ box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
   padding: 30px;
   margin: 20px auto;
   max-width: 800px;
@@ -344,7 +493,7 @@ body {
   background-color: #f8f9fa;
   padding: 15px;
   border-radius: 8px;
-  margin-bottom: 20px;
+ margin-bottom: 20px;
 }
 
 .datos-usuario p {
@@ -356,7 +505,7 @@ body {
   justify-content: space-around;
   margin: 30px 0;
   flex-wrap: wrap;
-  gap: 15px;
+ gap: 15px;
 }
 
 .estadistica {
@@ -365,7 +514,7 @@ body {
   padding: 15px;
   border-radius: 8px;
   background-color: #f8f9fa;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .estadistica.correcta {
@@ -437,7 +586,7 @@ body {
   width: 30px;
   height: 30px;
   display: flex;
-  align-items: center;
+ align-items: center;
   justify-content: center;
   border-radius: 50%;
   margin-right: 15px;
@@ -448,9 +597,9 @@ body {
   flex: 1;
 }
 
-.texto-ejercicio {
+.texto-ejercicio { /* Re-declarado, asegurar que sea el mismo que el de arriba */
   margin-bottom: 10px;
-  color: #2c3e50;
+ color: #2c3e50;
 }
 
 .respuesta-detalle {
@@ -475,17 +624,17 @@ body {
 
 .estado-respuesta.sin-responder {
   background-color: #fef9e7;
-  color: #f39c12;
+ color: #f39c12;
 }
 
-.boton-reiniciar {
+.boton-reiniciar { /* Usado para Volver al Inicio en Resultados */
   display: block;
   margin: 30px auto 0;
   padding: 12px 30px;
   background-color: #3498db;
   color: white;
   border: none;
-  border-radius: 6px;
+ border-radius: 6px;
   font-size: 1.1rem;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -501,7 +650,8 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 100vh; /* Mantenido para carga inicial */
+  /* Para cargas intermedias, puede que no necesite 100vh si se superpone */
 }
 
 .spinner {
@@ -510,15 +660,39 @@ body {
   border: 5px solid #f3f3f3;
   border-top: 5px solid #3498db;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+ animation: spin 1s linear infinite;
   margin-bottom: 20px;
 }
 
 @keyframes spin {
   0% {
     transform: rotate(0deg);
-  }
+ }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+/* Media Queries para Responsiveness (Ejemplo básico) */
+@media (max-width: 768px) {
+  .inicio-opciones-container {
+    flex-direction: column;
+    align-items: center; /* Centra las cajas cuando están en columna */
+  }
+  .inicio-opcion-recuadro {
+    max-width: 90%; /* Ocupa más ancho en pantallas pequeñas */
+    margin-bottom: 20px; /* Espacio si se apilan */
+  }
+  .controles-navegacion {
+    flex-direction: column;
+    gap: 15px;
+  }
+  .controles-navegacion > div {
+    width: 100%;
+    justify-content: space-around;
+  }
+  .controles-navegacion .boton-nav,
+  .controles-navegacion .boton-finalizar {
+    width: 48%; /* Ocupar casi la mitad */
   }
 }
