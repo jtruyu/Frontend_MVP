@@ -308,7 +308,7 @@ body {
 }
 
 .opcion {
-  padding: 10px;
+  padding: 8px 15px; /* Ajustado el padding para hacer el recuadro más delgado */
   margin-bottom: 10px;
   border: 1px solid #ddd;
   border-radius: 6px;
@@ -324,39 +324,45 @@ body {
 
 .opcion label {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-start; /* Alinea los ítems al inicio del contenedor flex */
   cursor: pointer;
   width: 100%;
 }
 
 .opcion input[type="radio"] {
-  margin-right: 12px;
+  margin-right: 8px; /* Espacio entre el radio button y el texto */
   margin-top: 3px;
-  flex-shrink: 0;
+  flex-shrink: 0; /* Evita que el radio button se encoja */
 }
 
-.texto-opcion-container {
+/* La clase .texto-opcion-container ya no es necesaria si combinamos los spans */
+/* .texto-opcion-container {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   text-align: left;
-  margin-left: 20px;
+  margin-left: 0;
   width: 100%;
   justify-content: flex-start;
-}
+} */
 
-.letra-opcion {
+/* La clase .letra-opcion ya no es necesaria si combinamos los spans */
+/* .letra-opcion {
   margin-right: 5px;
   font-weight: bold;
   flex-shrink: 0;
-}
+} */
 
 .texto-opcion {
-  flex: 1;
-  display: inline-block;
+  /* flex: 1; */ /* Eliminado para evitar que tome todo el espacio y centre el texto */
+  display: inline-block; /* Ocupa solo el espacio necesario */
   padding-right: 10px;
   font-size: 1.3rem;
+  text-align: left; /* Asegura la alineación a la izquierda */
+  word-break: break-word; /* Permite que las palabras largas se rompan */
+  overflow-wrap: break-word; /* Otra propiedad para el salto de palabra */
 }
+
 
 .controles-navegacion {
   display: flex;
@@ -632,22 +638,27 @@ body {
 
 .temas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Más pequeño */
-  gap: 10px; /* Menor espacio */
-  margin-top: 20px; /* Menor margen */
-  margin-bottom: 20px; /* Menor margen */
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); /* Aún más pequeño para más columnas */
+  gap: 8px; /* Menor espacio entre tarjetas */
+  margin-top: 20px;
+  margin-bottom: 20px;
   width: 100%;
   max-width: 800px;
 }
 
 .tema-card {
   background-color: white;
-  padding: 15px; /* Menor padding */
+  padding: 8px 10px; /* Reducido para hacer las tarjetas más delgadas */
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.3s;
   border: 2px solid transparent;
+  min-height: 50px; /* Altura mínima para que el texto se envuelva */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .tema-card:hover {
@@ -662,13 +673,15 @@ body {
 
 .tema-card h3 {
   color: #2c3e50;
-  font-size: 1.1rem; /* Fuente más pequeña */
-  margin-bottom: 5px;
+  font-size: 0.95rem; /* Fuente más pequeña para evitar desbordamiento */
+  margin: 0; /* Asegurar que no haya márgenes internos */
+  padding: 0;
+  white-space: normal; /* Permitir que el texto se envuelva */
+  word-break: break-word; /* Romper palabras largas si es necesario */
 }
 
 .tema-card p {
-  font-size: 0.85rem; /* Fuente más pequeña */
-  color: #7f8c8d;
+  display: none; /* Ocultar la descripción */
 }
 
 .controles-banco-preguntas {
