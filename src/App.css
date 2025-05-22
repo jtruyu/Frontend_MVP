@@ -335,26 +335,7 @@ body {
   flex-shrink: 0; /* Evita que el radio button se encoja */
 }
 
-/* La clase .texto-opcion-container ya no es necesaria si combinamos los spans */
-/* .texto-opcion-container {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  text-align: left;
-  margin-left: 0;
-  width: 100%;
-  justify-content: flex-start;
-} */
-
-/* La clase .letra-opcion ya no es necesaria si combinamos los spans */
-/* .letra-opcion {
-  margin-right: 5px;
-  font-weight: bold;
-  flex-shrink: 0;
-} */
-
 .texto-opcion {
-  /* flex: 1; */ /* Eliminado para evitar que tome todo el espacio y centre el texto */
   display: inline-block; /* Ocupa solo el espacio necesario */
   padding-right: 10px;
   font-size: 1.3rem;
@@ -638,7 +619,7 @@ body {
 
 .temas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); /* Aún más pequeño para más columnas */
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* Ajustado minmax para más ancho */
   gap: 8px; /* Menor espacio entre tarjetas */
   margin-top: 20px;
   margin-bottom: 20px;
@@ -654,7 +635,7 @@ body {
   cursor: pointer;
   transition: all 0.3s;
   border: 2px solid transparent;
-  min-height: 50px; /* Altura mínima para que el texto se envuelva */
+  min-height: 70px; /* Aumentado para hacerlas más largas */
   display: flex;
   align-items: center;
   justify-content: center;
